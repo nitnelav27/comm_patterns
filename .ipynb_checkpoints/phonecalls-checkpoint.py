@@ -204,7 +204,7 @@ def get_f(callsdf, theego, bina, binell):
             df3.sort_values(by='time', inplace=True)
             lamb = (df3.iloc[-1]['uclock'] - df3.iloc[0]['uclock']) // binell
             df3['alpha'] = df3['aclock'] // bina
-            tmp = df3.groupby('alpha').count()
+            tmp = df3.groupby('alpha').size()
             f[ego][alter] = pd.DataFrame({'lambda': lamb, 'alpha': tmp.index, 'f': tmp})
             f[ego][alter].reset_index(drop=True, inplace=True)
     return f
