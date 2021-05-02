@@ -178,7 +178,7 @@ def remove_alters(callsdf, lives, num_days):
     return newdf
 
 
-def get_f(callsdf, theego, bina, binell):
+def get_f(callsdf, theego, bina, binell, external_lives=False):
     '''
     This method outputs a dataframe with one row per (a, ell) combination, and the number
     of phone calls ego made to alters with that combination of parameters. The arguments are
@@ -202,9 +202,12 @@ def get_f(callsdf, theego, bina, binell):
         for alter in df2['alter'].unique():
             df3 = df2.loc[df2['alter'] == alter]
             df3.sort_values(by='time', inplace=True)
-            lamb = (df3.iloc[-1]['uclock'] - df3.iloc[0]['uclock']) // binell
+            if not external_lives:
+                lamb = (df3.iloc[-1]['uclock'] - df3.iloc[0]['uclock']) // binell
+            else:
+                lamb = external_lives[ego][alter]['ell'] // binell
             df3['alpha'] = df3['aclock'] // bina
-            tmp = df3.groupby('alpha').count()
+            tmp = df3.groupby('alpha').size()
             f[ego][alter] = pd.DataFrame({'lambda': lamb, 'alpha': tmp.index, 'f': tmp})
             f[ego][alter].reset_index(drop=True, inplace=True)
     return f
@@ -265,7 +268,7 @@ def get_g(fresult, xaxis='alpha'):
         for alter in fresult[ego].keys():
             for i in fresult[ego][alter].index:
                 a = fresult[ego][alter].at[i, 'alpha']
-                l = fresult[ego][alter].at[i, 'lamb']
+                l = fresult[ego][alter].at[i, 'lambda']
                 f = fresult[ego][alter].at[i, 'f']
                 if xaxis == 'lambda':
                     g[ego][a] = g[ego].get(a, {})
@@ -319,7 +322,7 @@ def plot_g(gresult, xaxis):
                 result[l] = result.get(l, {})
                 result[l][a] = result[l].get(a, [])
                 result[l][a].append(g)
-
+                
     r2 = {}
     for k in sorted(list(result.keys())):
         r2[k] = pd.DataFrame()
@@ -349,12 +352,12 @@ def get_b(fresult, xaxis='alpha'):
         g[ego] = {}
         altl = {}
         for alter in fresult[ego].keys():
-            l = list(fresult[ego][alter]['lamb'].unique())[0]
+            l = list(fresult[ego][alter]['lambda'].unique())[0]
             altl[l] = altl.get(l, 0) + 1
         for alter in fresult[ego].keys():
             for i in fresult[ego][alter].index:
                 a = fresult[ego][alter].at[i, 'alpha']
-                l = fresult[ego][alter].at[i, 'lamb']
+                l = fresult[ego][alter].at[i, 'lambda']
                 f = fresult[ego][alter].at[i, 'f']
                 if xaxis == 'lambda':
                     g[ego][a] = g[ego].get(a, {})
