@@ -387,3 +387,52 @@ def get_b(fresult, xaxis='alpha'):
         df.reset_index(drop=True, inplace=True)
         r[ego] = df
     return r
+
+
+def f_histell(fresult, alpha_fixed, cut_points, uptoapoint=False, binned=False, deltaF=5):
+    test = {}
+    if uptoapoint:
+        for ego in fresult.keys():
+            for alter in fresult[ego].keys():
+                df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alpha_fixed]
+                if len(df) > 0:
+                    lamb = df.iloc[0]['lambda']
+                    for f in df['f']:
+                        for cut in cut_points:
+                            if f < cut:
+                                df2 = df.loc[df['f'] < cut]
+                                test[cut_points.index(cut)] = test.get(cut_points.index(cut), {})
+                                test[cut_points.index(cut)][lamb] = test[cut_points.index(cut)].get(lamb, 0) + sum(df2['f'])
+                                
+    elif binned:
+        for ego in fresult.keys():
+            for alter in fresult[ego].keys():
+                fresult[ego][alter]['phi'] = fresult[ego][alter]['f'] // deltaF
+                df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alpha_fixed]
+                if len(df) > 0:
+                    lamb = df.iloc[0]['lambda']
+                    for phi in df['phi'].unique():
+                        df2 = df.loc[df['phi'] == phi]
+                        test[phi] = test.get(phi, {})
+                        test[phi][lamb] = test[phi].get(lamb, 0) + sum(df2['f'])
+                        #test[phi][lamb] = test[phi].get(lamb, 0) + 1
+                
+                            
+    else:
+        cutp = [0] + cut_points
+        for ego in fresult.keys():
+            for alter in fresult[ego].keys():
+                df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alpha_fixed]
+                if len(df) > 0:
+                    lamb = df.iloc[0]['lambda']
+                    for i in range(len(cutp) - 1):
+                        df2 = df.loc[(df['f'] >= cutp[i]) & (df['f'] < cutp[i + 1])]
+                        test[i] = test.get(i, {})
+                        test[i][lamb] = test[i].get(lamb, 0) + sum(df2['f'])
+                        
+
+    for i in test.keys():
+        test[i] = pd.DataFrame.from_dict(test[i], orient='index')
+        test[i].sort_index(inplace=True)
+        
+    return test
