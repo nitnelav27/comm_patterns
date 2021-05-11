@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 import networkx as nx
 import datetime as dt
+import scipy.stats as stats
 import copy
 import os
 
@@ -436,3 +437,67 @@ def f_histell(fresult, alpha_fixed, cut_points, uptoapoint=False, binned=False, 
         test[i].sort_index(inplace=True)
         
     return test
+
+def hatf(callsdf, lives_dict, deltat = 2000):
+    result = {}
+    result['all'] = {}
+    df2all = {}
+    numtall = max(callsdf['uclock']) // deltat
+    for ego in callsdf['ego'].unique():
+        result[ego] = {}
+        df = callsdf.loc[callsdf['ego'] == ego]
+        df2 = {}
+        numt = max(df['uclock']) // deltat
+        for tau in range(numt + 1):
+            df2[tau] = df.loc[(df['uclock'] >= tau * deltat) & (df['uclock'] < (tau + 1) * deltat)]
+            altersell = [lives_dict[ego][alter]['ell'] for alter in df2[tau]['alter'].unique()]
+            altersell.sort()
+            for alter in df2[tau]['alter'].unique():
+                ell = lives_dict[ego][alter]['ell']
+                per = int(stats.percentileofscore(altersell, ell))
+                df3 = df2[tau].loc[df2[tau]['alter'] == alter]
+                result[ego][tau] = result[ego].get(tau, {})
+                result['all'][tau] = result['all'].get(tau, {})
+                result[ego][tau][per] = result[ego][tau].get(per, 0) + len(df3)
+                result['all'][tau][per] = result['all'][tau].get(per, 0) + len(df3)
+    res2 = {}
+    for ego in result.keys():
+        res2[ego] = {}
+        for tau in result[ego].keys():
+            res2[ego][tau] = pd.DataFrame.from_dict(result[ego][tau], orient='index', columns=['f'])
+            res2[ego][tau].sort_index(inplace=True)
+            res2[ego][tau]['tmp'] = res2[ego][tau]['f'].div(sum(res2[ego][tau]['f']))
+            res2[ego][tau]['ftil'] = res2[ego][tau]['tmp'].cumsum()
+            res2[ego][tau].drop(columns=['tmp'], inplace=True)
+            
+    return res2
+
+def get_avg(df, perclist, tau=0):
+    '''
+    df must be produced with the hatf function
+    '''
+    tmp = {}
+    for ego in df.keys():
+        if ego != 'all':
+            df1 = df[ego][tau]
+            thisp = list(df1.index)
+            for p in perclist:
+                if p in thisp:
+                    tmp[p] = tmp.get(p, [])
+                    tmp[p].append(df1.at[p, 'ftil'])
+                else:
+                    for pp in range(len(thisp) - 1):
+                        if ((p > thisp[pp]) and (p < thisp[pp + 1])) or (p < thisp[0]):
+                            x0 = thisp[pp]
+                            y0 = df1.at[x0, 'ftil']
+                            x1 = thisp[pp + 1]
+                            y1 = df1.at[x1, 'ftil']
+                            break
+                    m = (y1 - y0) / (x1 - x0)
+                    F = (m * p) + y0 - (m * x0)
+                    tmp[p] = tmp.get(p, [])
+                    tmp[p].append(F)
+    for p in tmp.keys():
+        tmp[p] = np.mean(tmp[p])
+        
+    return tmp
