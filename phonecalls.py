@@ -403,7 +403,7 @@ def f_histell(fresult, alpha_fixed, cut_points, uptoapoint=False, binned=False, 
                             if f < cut:
                                 df2 = df.loc[df['f'] < cut]
                                 test[cut_points.index(cut)] = test.get(cut_points.index(cut), {})
-                                test[cut_points.index(cut)][lamb] = test[cut_points.index(cut)].get(lamb, 0) + sum(df2['f'])
+                                test[cut_points.index(cut)][lamb] = test[cut_points.index(cut)].get(lamb, 0) + 1
                                 
     elif binned:
         for ego in fresult.keys():
@@ -415,8 +415,8 @@ def f_histell(fresult, alpha_fixed, cut_points, uptoapoint=False, binned=False, 
                     for phi in df['phi'].unique():
                         df2 = df.loc[df['phi'] == phi]
                         test[phi] = test.get(phi, {})
-                        test[phi][lamb] = test[phi].get(lamb, 0) + sum(df2['f'])
-                        #test[phi][lamb] = test[phi].get(lamb, 0) + 1
+                        #test[phi][lamb] = test[phi].get(lamb, 0) + sum(df2['f'])
+                        test[phi][lamb] = test[phi].get(lamb, 0) + 1
                 
                             
     else:
@@ -429,7 +429,7 @@ def f_histell(fresult, alpha_fixed, cut_points, uptoapoint=False, binned=False, 
                     for i in range(len(cutp) - 1):
                         df2 = df.loc[(df['f'] >= cutp[i]) & (df['f'] < cutp[i + 1])]
                         test[i] = test.get(i, {})
-                        test[i][lamb] = test[i].get(lamb, 0) + sum(df2['f'])
+                        test[i][lamb] = test[i].get(lamb, 0) + 1
                         
 
     for i in test.keys():
