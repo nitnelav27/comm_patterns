@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       158,          7]
-NotebookDataLength[   1014874,      20536]
-NotebookOptionsPosition[   1008614,      20430]
-NotebookOutlinePosition[   1009041,      20447]
-CellTagsIndexPosition[   1008998,      20444]
+NotebookDataLength[   1015122,      20541]
+NotebookOptionsPosition[   1008867,      20435]
+NotebookOutlinePosition[   1009289,      20452]
+CellTagsIndexPosition[   1009246,      20449]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -21,21 +21,23 @@ Notebook[{
 
 Cell[CellGroupData[{
 Cell[BoxData[
- RowBox[{"SetDirectory", "[", "\"\<~/docs/research/commpatterns/data\>\"", 
-  "]"}]], "Input",
+ RowBox[{"SetDirectory", "[", 
+  "\"\<~/Documents/research/commpatterns/data\>\"", "]"}]], "Input",
  CellChangeTimes->{{3.8315658692262297`*^9, 3.831565897549986*^9}, {
   3.832700480515974*^9, 3.832700613753312*^9}, {3.832932552357664*^9, 
   3.832932573940027*^9}, {3.832932690057107*^9, 3.8329326910552883`*^9}, {
-  3.832945835698348*^9, 3.83294584624354*^9}},
- CellLabel->"In[72]:=",ExpressionUUID->"180b40f6-46ff-48e4-898d-635d0c2024cf"],
+  3.832945835698348*^9, 3.83294584624354*^9}, {3.83320164488615*^9, 
+  3.833201646386704*^9}},
+ CellLabel->"In[1]:=",ExpressionUUID->"180b40f6-46ff-48e4-898d-635d0c2024cf"],
 
-Cell[BoxData["\<\"/Users/vsvh/docs/research/commpatterns/data\"\>"], "Output",
+Cell[BoxData["\<\"/Users/vsvh/Documents/research/commpatterns/data\"\>"], \
+"Output",
  CellChangeTimes->{
   3.831565899450185*^9, 3.832700497699903*^9, 3.832700615451167*^9, 
    3.8327487627355747`*^9, 3.832765128366818*^9, {3.832932565138068*^9, 
    3.832932579155903*^9}, 3.832932693785882*^9, 3.832933150483844*^9, {
-   3.832945839842448*^9, 3.832945848921672*^9}},
- CellLabel->"Out[72]=",ExpressionUUID->"dcba43b2-55b4-49b5-b8cf-0f6dc22def90"]
+   3.832945839842448*^9, 3.832945848921672*^9}, 3.833201656965992*^9},
+ CellLabel->"Out[1]=",ExpressionUUID->"18f199fa-5579-43bd-b1d1-135cf4ea26be"]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -233,8 +235,9 @@ Cell[BoxData[
    RowBox[{
     RowBox[{"FontFamily", "->", "\"\<Latin Modern Roman\>\""}], ",", 
     RowBox[{"FontSize", "->", "12"}]}], "}"}]}]], "Input",
- CellChangeTimes->{{3.832712603552889*^9, 3.832712609821484*^9}},
- CellLabel->"In[9]:=",ExpressionUUID->"9778dbe4-87d1-4fb6-9688-2fbd106911d1"],
+ CellChangeTimes->{{3.832712603552889*^9, 3.832712609821484*^9}, {
+  3.833201733410406*^9, 3.8332017351108522`*^9}},
+ CellLabel->"In[3]:=",ExpressionUUID->"9778dbe4-87d1-4fb6-9688-2fbd106911d1"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -242,8 +245,8 @@ Cell[BoxData[
    RowBox[{"FontFamily", "\[Rule]", "\<\"Latin Modern Roman\"\>"}], ",", 
    RowBox[{"FontSize", "\[Rule]", "12"}]}], "}"}]], "Output",
  CellChangeTimes->{3.83271261102774*^9, 3.832748781722563*^9, 
-  3.832749001359631*^9, 3.832933210628169*^9},
- CellLabel->"Out[9]=",ExpressionUUID->"47ea8b74-63b7-40fc-88d6-acd40105e03a"]
+  3.832749001359631*^9, 3.832933210628169*^9, 3.833201736272822*^9},
+ CellLabel->"Out[3]=",ExpressionUUID->"cc7ccf4e-f7f2-4b19-8c07-ae50c786f41d"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -3591,7 +3594,7 @@ Cell[CellGroupData[{
 Cell[BoxData["$FontFamilies"], "Input",
  CellChangeTimes->{{3.832713015263528*^9, 3.83271301866604*^9}, {
   3.8327132148093224`*^9, 3.8327132165488462`*^9}},
- CellLabel->"In[8]:=",ExpressionUUID->"9389e80a-de35-4d0c-bb20-c0e92fc92d1c"],
+ CellLabel->"In[2]:=",ExpressionUUID->"9389e80a-de35-4d0c-bb20-c0e92fc92d1c"],
 
 Cell[BoxData[
  RowBox[{"{", 
@@ -3599,14 +3602,13 @@ Cell[BoxData[
    ",", "\<\"Alegreya SC\"\>", ",", "\<\"all-the-icons\"\>", 
    ",", "\<\"Al Nile\"\>", ",", "\<\"Al Tarikh\"\>", 
    ",", "\<\"American Typewriter\"\>", ",", "\<\"Andale Mono\"\>", 
-   ",", "\<\"Anonymous Pro for Powerline\"\>", ",", "\<\"Apple Braille\"\>", 
-   ",", "\<\"Apple Chancery\"\>", ",", "\<\"Apple Color Emoji\"\>", 
-   ",", "\<\"AppleGothic\"\>", ",", "\<\"AppleMyungjo\"\>", 
-   ",", "\<\"Apple SD Gothic Neo\"\>", ",", "\<\"Apple Symbols\"\>", 
-   ",", "\<\"Arial\"\>", ",", "\<\"Arial Black\"\>", 
-   ",", "\<\"Arial Hebrew\"\>", ",", "\<\"Arial Hebrew Scholar\"\>", 
-   ",", "\<\"Arial Narrow\"\>", ",", "\<\"Arial Rounded MT Bold\"\>", 
-   ",", "\<\"Arial Unicode MS\"\>", ",", "\<\"Arimo for Powerline\"\>", 
+   ",", "\<\"Apple Braille\"\>", ",", "\<\"Apple Chancery\"\>", 
+   ",", "\<\"Apple Color Emoji\"\>", ",", "\<\"AppleGothic\"\>", 
+   ",", "\<\"AppleMyungjo\"\>", ",", "\<\"Apple SD Gothic Neo\"\>", 
+   ",", "\<\"Apple Symbols\"\>", ",", "\<\"Arial\"\>", 
+   ",", "\<\"Arial Black\"\>", ",", "\<\"Arial Hebrew\"\>", 
+   ",", "\<\"Arial Hebrew Scholar\"\>", ",", "\<\"Arial Narrow\"\>", 
+   ",", "\<\"Arial Rounded MT Bold\"\>", ",", "\<\"Arial Unicode MS\"\>", 
    ",", "\<\"Avenir\"\>", ",", "\<\"Avenir Next\"\>", 
    ",", "\<\"Avenir Next Condensed\"\>", ",", "\<\"Ayuthaya\"\>", 
    ",", "\<\"Baghdad\"\>", ",", "\<\"Bangla MN\"\>", 
@@ -3623,43 +3625,36 @@ Cell[BoxData[
    ",", "\<\"Comic Sans MS\"\>", ",", "\<\"Copperplate\"\>", 
    ",", "\<\"Corsiva Hebrew\"\>", ",", "\<\"Courier\"\>", 
    ",", "\<\"Courier New\"\>", ",", "\<\"Cousine\"\>", 
-   ",", "\<\"Cousine for Powerline\"\>", ",", "\<\"Damascus\"\>", 
-   ",", "\<\"DecoType Naskh\"\>", 
-   ",", "\<\"DejaVu Sans Mono for Powerline\"\>", 
+   ",", "\<\"Damascus\"\>", ",", "\<\"DecoType Naskh\"\>", 
    ",", "\<\"Devanagari MT\"\>", ",", "\<\"Devanagari Sangam MN\"\>", 
    ",", "\<\"Didot\"\>", ",", "\<\"DIN Alternate\"\>", 
    ",", "\<\"DIN Condensed\"\>", ",", "\<\"Diwan Kufi\"\>", 
-   ",", "\<\"Diwan Thuluth\"\>", 
-   ",", "\<\"Droid Sans Mono Dotted for Powerline\"\>", 
-   ",", "\<\"Droid Sans Mono for Powerline\"\>", 
-   ",", "\<\"Droid Sans Mono Slashed for Powerline\"\>", 
+   ",", "\<\"Diwan Thuluth\"\>", ",", "\<\"Droid Sans Mono Awesome\"\>", 
    ",", "\<\"Droid Serif\"\>", ",", "\<\"EB Garamond\"\>", 
    ",", "\<\"EB Garamond 12 All SC\"\>", ",", "\<\"EB Garamond SC\"\>", 
    ",", "\<\"Economica\"\>", ",", "\<\"Euphemia UCAS\"\>", 
    ",", "\<\"Farah\"\>", ",", "\<\"Farisi\"\>", ",", "\<\"Felipa\"\>", 
-   ",", "\<\"file-icons\"\>", ",", "\<\"Fira Mono for Powerline\"\>", 
-   ",", "\<\"Fira Sans\"\>", ",", "\<\"FontAwesome\"\>", 
-   ",", "\<\"Futura\"\>", ",", "\<\"Galvji\"\>", 
+   ",", "\<\"file-icons\"\>", ",", "\<\"Fira Code\"\>", 
+   ",", "\<\"FiraCode Nerd Font\"\>", ",", "\<\"FiraCode Nerd Font Mono\"\>", 
+   ",", "\<\"FiraMono Nerd Font\"\>", ",", "\<\"FiraMono Nerd Font Mono\"\>", 
+   ",", "\<\"Fira Sans\"\>", ",", "\<\"Fira Sans Condensed\"\>", 
+   ",", "\<\"FontAwesome\"\>", ",", "\<\"Futura\"\>", ",", "\<\"Galvji\"\>", 
    ",", "\<\"GB18030 Bitmap\"\>", ",", "\<\"Geeza Pro\"\>", 
    ",", "\<\"Geneva\"\>", ",", "\<\"Gentium Basic\"\>", 
    ",", "\<\"Georgia\"\>", ",", "\<\"Gill Sans\"\>", 
-   ",", "\<\"github-octicons\"\>", ",", "\<\"Go Mono for Powerline\"\>", 
-   ",", "\<\"Grantha Sangam MN\"\>", ",", "\<\"Gujarati MT\"\>", 
-   ",", "\<\"Gujarati Sangam MN\"\>", ",", "\<\"Gurmukhi MN\"\>", 
-   ",", "\<\"Gurmukhi MT\"\>", ",", "\<\"Gurmukhi Sangam MN\"\>", 
-   ",", "\<\"Hack\"\>", ",", "\<\"Hasklig\"\>", 
-   ",", "\<\"Hasklug Nerd Font\"\>", ",", "\<\"Heiti SC\"\>", 
-   ",", "\<\"Heiti TC\"\>", ",", "\<\"Helvetica\"\>", 
-   ",", "\<\"Helvetica Neue\"\>", ",", "\<\"Herculanum\"\>", 
+   ",", "\<\"github-octicons\"\>", ",", "\<\"Grantha Sangam MN\"\>", 
+   ",", "\<\"Gujarati MT\"\>", ",", "\<\"Gujarati Sangam MN\"\>", 
+   ",", "\<\"Gurmukhi MN\"\>", ",", "\<\"Gurmukhi MT\"\>", 
+   ",", "\<\"Gurmukhi Sangam MN\"\>", ",", "\<\"Hasklig\"\>", 
+   ",", "\<\"Heiti SC\"\>", ",", "\<\"Heiti TC\"\>", ",", "\<\"Helvetica\"\>",
+    ",", "\<\"Helvetica Neue\"\>", ",", "\<\"Herculanum\"\>", 
    ",", "\<\"Hiragino Maru Gothic ProN\"\>", 
    ",", "\<\"Hiragino Mincho ProN\"\>", ",", "\<\"Hiragino Sans\"\>", 
    ",", "\<\"Hiragino Sans GB\"\>", ",", "\<\"Hoefler Text\"\>", 
-   ",", "\<\"IBM 3270\"\>", ",", "\<\"IBM 3270 Narrow\"\>", 
-   ",", "\<\"IBM 3270 Semi-Narrow\"\>", ",", "\<\"Impact\"\>", 
-   ",", "\<\"InaiMathi\"\>", ",", "\<\"Inconsolata\"\>", 
-   ",", "\<\"Inconsolata-dz for Powerline\"\>", 
-   ",", "\<\"Inconsolata for Powerline\"\>", 
-   ",", "\<\"Inconsolata-g for Powerline\"\>", ",", "\<\"ITF Devanagari\"\>", 
+   ",", "\<\"Impact\"\>", ",", "\<\"InaiMathi\"\>", 
+   ",", "\<\"Inconsolata\"\>", ",", "\<\"Inconsolata Awesome\"\>", 
+   ",", "\<\"Inconsolata Nerd Font\"\>", 
+   ",", "\<\"Inconsolata Nerd Font Mono\"\>", ",", "\<\"ITF Devanagari\"\>", 
    ",", "\<\"ITF Devanagari Marathi\"\>", ",", "\<\"Kailasa\"\>", 
    ",", "\<\"Kalam\"\>", ",", "\<\"Kannada MN\"\>", 
    ",", "\<\"Kannada Sangam MN\"\>", ",", "\<\"Kefa\"\>", 
@@ -3669,51 +3664,62 @@ Cell[BoxData[
    ",", "\<\"Kokonor\"\>", ",", "\<\"Krungthep\"\>", 
    ",", "\<\"KufiStandardGK\"\>", ",", "\<\"Lao MN\"\>", 
    ",", "\<\"Lao Sangam MN\"\>", ",", "\<\"Lato\"\>", 
-   ",", "\<\"League Gothic\"\>", ",", "\<\"Liberation Mono for Powerline\"\>",
-    ",", "\<\"Lucida Grande\"\>", ",", "\<\"Luminari\"\>", 
+   ",", "\<\"League Gothic\"\>", ",", "\<\"LiterationMono Nerd Font\"\>", 
+   ",", "\<\"LiterationMono Nerd Font Mono\"\>", 
+   ",", "\<\"LiterationSans Nerd Font\"\>", 
+   ",", "\<\"LiterationSans Nerd Font Mono\"\>", 
+   ",", "\<\"LiterationSerif Nerd Font\"\>", 
+   ",", "\<\"LiterationSerif Nerd Font Mono\"\>", 
+   ",", "\<\"Lucida Grande\"\>", ",", "\<\"Luminari\"\>", 
    ",", "\<\"Malayalam MN\"\>", ",", "\<\"Malayalam Sangam MN\"\>", 
    ",", "\<\"Marker Felt\"\>", ",", "\<\"Material Icons\"\>", 
-   ",", "\<\"Menlo\"\>", ",", "\<\"Meslo LG L DZ for Powerline\"\>", 
-   ",", "\<\"Meslo LG L for Powerline\"\>", 
-   ",", "\<\"Meslo LG M DZ for Powerline\"\>", 
-   ",", "\<\"Meslo LG M for Powerline\"\>", 
-   ",", "\<\"Meslo LG S DZ for Powerline\"\>", 
-   ",", "\<\"Meslo LG S for Powerline\"\>", ",", "\<\"MesloLGS NF\"\>", 
+   ",", "\<\"Menlo\"\>", ",", "\<\"MesloLGLDZ Nerd Font\"\>", 
+   ",", "\<\"MesloLGLDZ Nerd Font Mono\"\>", 
+   ",", "\<\"MesloLGL Nerd Font\"\>", ",", "\<\"MesloLGL Nerd Font Mono\"\>", 
+   ",", "\<\"MesloLGMDZ Nerd Font\"\>", 
+   ",", "\<\"MesloLGMDZ Nerd Font Mono\"\>", 
+   ",", "\<\"MesloLGM Nerd Font\"\>", ",", "\<\"MesloLGM Nerd Font Mono\"\>", 
+   ",", "\<\"MesloLGSDZ Nerd Font\"\>", 
+   ",", "\<\"MesloLGSDZ Nerd Font Mono\"\>", 
+   ",", "\<\"MesloLGS Nerd Font\"\>", ",", "\<\"MesloLGS Nerd Font Mono\"\>", 
    ",", "\<\"Microsoft Sans Serif\"\>", ",", "\<\"Mishafi\"\>", 
    ",", "\<\"Mishafi Gold\"\>", ",", "\<\"Monaco\"\>", 
-   ",", "\<\"monofur for Powerline\"\>", ",", "\<\"Mshtakan\"\>", 
-   ",", "\<\"Mukta Mahee\"\>", ",", "\<\"Muna\"\>", ",", "\<\"Myanmar MN\"\>",
-    ",", "\<\"Myanmar Sangam MN\"\>", ",", "\<\"Nadeem\"\>", 
-   ",", "\<\"New Peninim MT\"\>", ",", "\<\"Noteworthy\"\>", 
-   ",", "\<\"Noto Mono for Powerline\"\>", ",", "\<\"Noto Nastaliq Urdu\"\>", 
-   ",", "\<\"Noto Sans Kannada\"\>", ",", "\<\"Noto Sans Myanmar\"\>", 
-   ",", "\<\"Noto Sans Oriya\"\>", ",", "\<\"Noto Serif Myanmar\"\>", 
-   ",", "\<\"NovaMono for Powerline\"\>", ",", "\<\"Optima\"\>", 
+   ",", "\<\"Mshtakan\"\>", ",", "\<\"Mukta Mahee\"\>", ",", "\<\"Muna\"\>", 
+   ",", "\<\"Myanmar MN\"\>", ",", "\<\"Myanmar Sangam MN\"\>", 
+   ",", "\<\"Nadeem\"\>", ",", "\<\"New Peninim MT\"\>", 
+   ",", "\<\"Noteworthy\"\>", ",", "\<\"NotoEmoji Nerd Font\"\>", 
+   ",", "\<\"NotoEmoji Nerd Font Mono\"\>", ",", "\<\"NotoMono Nerd Font\"\>",
+    ",", "\<\"NotoMono Nerd Font Mono\"\>", ",", "\<\"Noto Nastaliq Urdu\"\>",
+    ",", "\<\"NotoSansDisplay Nerd Font\"\>", 
+   ",", "\<\"NotoSansDisplay Nerd Font Mono\"\>", 
+   ",", "\<\"Noto Sans Kannada\"\>", ",", "\<\"NotoSansMono Nerd Font\"\>", 
+   ",", "\<\"NotoSansMono Nerd Font Mono\"\>", 
+   ",", "\<\"Noto Sans Myanmar\"\>", ",", "\<\"NotoSans Nerd Font\"\>", 
+   ",", "\<\"NotoSans Nerd Font Mono\"\>", ",", "\<\"Noto Sans Oriya\"\>", 
+   ",", "\<\"NotoSerifDisplay Nerd Font\"\>", 
+   ",", "\<\"NotoSerifDisplay Nerd Font Mono\"\>", 
+   ",", "\<\"Noto Serif Myanmar\"\>", ",", "\<\"NotoSerif Nerd Font\"\>", 
+   ",", "\<\"NotoSerif Nerd Font Mono\"\>", ",", "\<\"Optima\"\>", 
    ",", "\<\"Oriya MN\"\>", ",", "\<\"Oriya Sangam MN\"\>", 
-   ",", "\<\"Osaka\"\>", ",", "\<\"Oswald\"\>", ",", "\<\"Palatino\"\>", 
-   ",", "\<\"Papyrus\"\>", ",", "\<\"Party LET\"\>", ",", "\<\"Phosphate\"\>",
-    ",", "\<\"PingFang HK\"\>", ",", "\<\"PingFang SC\"\>", 
+   ",", "\<\"Oswald\"\>", ",", "\<\"Palatino\"\>", ",", "\<\"Papyrus\"\>", 
+   ",", "\<\"Party LET\"\>", ",", "\<\"Phosphate\"\>", 
+   ",", "\<\"PingFang HK\"\>", ",", "\<\"PingFang SC\"\>", 
    ",", "\<\"PingFang TC\"\>", ",", "\<\"Plantagenet Cherokee\"\>", 
-   ",", "\<\"Playfair Display\"\>", ",", "\<\"ProFont for Powerline\"\>", 
-   ",", "\<\"PT Mono\"\>", ",", "\<\"PT Sans\"\>", 
-   ",", "\<\"PT Sans Caption\"\>", ",", "\<\"PT Sans Narrow\"\>", 
-   ",", "\<\"PT Serif\"\>", ",", "\<\"PT Serif Caption\"\>", 
-   ",", "\<\"Raanana\"\>", ",", "\<\"Roboto\"\>", 
-   ",", "\<\"Roboto Condensed\"\>", ",", "\<\"Roboto Mono for Powerline\"\>", 
-   ",", "\<\"Roboto Mono Light for Powerline\"\>", 
-   ",", "\<\"Roboto Mono Medium for Powerline\"\>", 
-   ",", "\<\"Roboto Mono Thin for Powerline\"\>", ",", "\<\"Roboto Slab\"\>", 
-   ",", "\<\"Rockwell\"\>", ",", "\<\"Sana\"\>", ",", "\<\"Sathu\"\>", 
-   ",", "\<\"SauceCodePro Nerd Font\"\>", ",", "\<\"Savoye LET\"\>", 
+   ",", "\<\"Playfair Display\"\>", ",", "\<\"PT Mono\"\>", 
+   ",", "\<\"PT Sans\"\>", ",", "\<\"PT Sans Caption\"\>", 
+   ",", "\<\"PT Sans Narrow\"\>", ",", "\<\"PT Serif\"\>", 
+   ",", "\<\"PT Serif Caption\"\>", ",", "\<\"Raanana\"\>", 
+   ",", "\<\"Roboto\"\>", ",", "\<\"Roboto Condensed\"\>", 
+   ",", "\<\"Roboto Slab\"\>", ",", "\<\"Rockwell\"\>", ",", "\<\"Sana\"\>", 
+   ",", "\<\"Sathu\"\>", ",", "\<\"Savoye LET\"\>", 
    ",", "\<\"Shadows Into Light Two\"\>", ",", "\<\"Shree Devanagari 714\"\>",
     ",", "\<\"SignPainter\"\>", ",", "\<\"Silom\"\>", 
    ",", "\<\"Sinhala MN\"\>", ",", "\<\"Sinhala Sangam MN\"\>", 
    ",", "\<\"Skia\"\>", ",", "\<\"Snell Roundhand\"\>", 
    ",", "\<\"Songti SC\"\>", ",", "\<\"Songti TC\"\>", 
    ",", "\<\"Source Code Pro\"\>", 
-   ",", "\<\"Source Code Pro for Powerline\"\>", 
+   ",", "\<\"SourceCodePro+Powerline+Awesome Regular\"\>", 
    ",", "\<\"Source Sans Pro\"\>", ",", "\<\"Source Serif Pro\"\>", 
-   ",", "\<\"Space Mono\"\>", ",", "\<\"Space Mono for Powerline\"\>", 
    ",", "\<\"STIXGeneral\"\>", ",", "\<\"STIXIntegralsD\"\>", 
    ",", "\<\"STIXIntegralsSm\"\>", ",", "\<\"STIXIntegralsUp\"\>", 
    ",", "\<\"STIXIntegralsUpD\"\>", ",", "\<\"STIXIntegralsUpSm\"\>", 
@@ -3721,15 +3727,13 @@ Cell[BoxData[
    ",", "\<\"STIXSizeFourSym\"\>", ",", "\<\"STIXSizeOneSym\"\>", 
    ",", "\<\"STIXSizeThreeSym\"\>", ",", "\<\"STIXSizeTwoSym\"\>", 
    ",", "\<\"STIXVariants\"\>", ",", "\<\"STSong\"\>", 
-   ",", "\<\"Sukhumvit Set\"\>", ",", "\<\"Symbol\"\>", 
-   ",", "\<\"Symbol Neu for Powerline\"\>", ",", "\<\"Tahoma\"\>", 
-   ",", "\<\"Tamil MN\"\>", ",", "\<\"Tamil Sangam MN\"\>", 
+   ",", "\<\"Sukhumvit Set\"\>", ",", "\<\"Symbol\"\>", ",", "\<\"Tahoma\"\>",
+    ",", "\<\"Tamil MN\"\>", ",", "\<\"Tamil Sangam MN\"\>", 
    ",", "\<\"Telugu MN\"\>", ",", "\<\"Telugu Sangam MN\"\>", 
    ",", "\<\"Thonburi\"\>", ",", "\<\"Times\"\>", 
-   ",", "\<\"Times New Roman\"\>", ",", "\<\"Tinos for Powerline\"\>", 
-   ",", "\<\"Titillium Web\"\>", ",", "\<\"Trattatello\"\>", 
-   ",", "\<\"Trebuchet MS\"\>", ",", "\<\"Twitter Color Emoji\"\>", 
-   ",", "\<\"Ubuntu Mono derivative Powerline\"\>", ",", "\<\"Verdana\"\>", 
+   ",", "\<\"Times New Roman\"\>", ",", "\<\"Titillium Web\"\>", 
+   ",", "\<\"Trattatello\"\>", ",", "\<\"Trebuchet MS\"\>", 
+   ",", "\<\"Twitter Color Emoji\"\>", ",", "\<\"Verdana\"\>", 
    ",", "\<\"Waseem\"\>", ",", "\<\"Weather Icons\"\>", 
    ",", "\<\"Webdings\"\>", ",", "\<\"Wingdings\"\>", 
    ",", "\<\"Wingdings 2\"\>", ",", "\<\"Wingdings 3\"\>", 
@@ -3737,8 +3741,9 @@ Cell[BoxData[
    ",", "\<\"Zapfino\"\>"}], "}"}]], "Output",
  CellChangeTimes->{
   3.832713020230427*^9, 3.8327132179091587`*^9, 3.8327138589202957`*^9, 
-   3.8329327175627213`*^9, {3.832933155472786*^9, 3.832933180913398*^9}},
- CellLabel->"Out[8]=",ExpressionUUID->"9a3368c3-e150-4b8d-b0a3-180a1e5f42b9"]
+   3.8329327175627213`*^9, {3.832933155472786*^9, 3.832933180913398*^9}, 
+   3.833201667492341*^9},
+ CellLabel->"Out[2]=",ExpressionUUID->"281c6b1e-9642-46a7-be65-e9a15a9a7289"]
 }, Open  ]],
 
 Cell[BoxData[
@@ -20431,7 +20436,7 @@ Alters\"", TraditionalForm], None}, {
 WindowSize->{1856, 1001},
 WindowMargins->{{4, Automatic}, {Automatic, 2}},
 Magnification:>1.3 Inherited,
-FrontEndVersion->"12.2 for Mac OS X x86 (64-bit) (December 12, 2020)",
+FrontEndVersion->"12.3 for Mac OS X x86 (64-bit) (May 11, 2021)",
 StyleDefinitions->"Default.nb",
 ExpressionUUID->"69d7d5ef-1498-4888-a805-34fe7691bae6"
 ]
@@ -20447,96 +20452,96 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[580, 22, 449, 7, 39, "Input",ExpressionUUID->"180b40f6-46ff-48e4-898d-635d0c2024cf"],
-Cell[1032, 31, 440, 6, 45, "Output",ExpressionUUID->"dcba43b2-55b4-49b5-b8cf-0f6dc22def90"]
+Cell[580, 22, 501, 8, 39, "Input",ExpressionUUID->"180b40f6-46ff-48e4-898d-635d0c2024cf"],
+Cell[1084, 32, 468, 7, 45, "Output",ExpressionUUID->"18f199fa-5579-43bd-b1d1-135cf4ea26be"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1509, 42, 236, 5, 39, "Input",ExpressionUUID->"073a2566-304d-495f-960a-f58010455594"],
-Cell[1748, 49, 8608, 169, 107, "Output",ExpressionUUID->"78f2f1d3-eda9-440d-af47-1d9e0749be60"]
+Cell[1589, 44, 236, 5, 39, "Input",ExpressionUUID->"073a2566-304d-495f-960a-f58010455594"],
+Cell[1828, 51, 8608, 169, 107, "Output",ExpressionUUID->"78f2f1d3-eda9-440d-af47-1d9e0749be60"]
 }, Open  ]],
-Cell[10371, 221, 220, 4, 39, "Input",ExpressionUUID->"561d8e75-5b66-4c6d-bc45-2cdb3442346c"],
+Cell[10451, 223, 220, 4, 39, "Input",ExpressionUUID->"561d8e75-5b66-4c6d-bc45-2cdb3442346c"],
 Cell[CellGroupData[{
-Cell[10616, 229, 341, 7, 39, "Input",ExpressionUUID->"9778dbe4-87d1-4fb6-9688-2fbd106911d1"],
-Cell[10960, 238, 363, 7, 45, "Output",ExpressionUUID->"47ea8b74-63b7-40fc-88d6-acd40105e03a"]
+Cell[10696, 231, 392, 8, 39, "Input",ExpressionUUID->"9778dbe4-87d1-4fb6-9688-2fbd106911d1"],
+Cell[11091, 241, 385, 7, 64, "Output",ExpressionUUID->"cc7ccf4e-f7f2-4b19-8c07-ae50c786f41d"]
 }, Open  ]],
-Cell[11338, 248, 584, 9, 39, "Input",ExpressionUUID->"773e7218-ac08-4db6-afe8-c89c69dafbdc"],
+Cell[11491, 251, 584, 9, 39, "Input",ExpressionUUID->"773e7218-ac08-4db6-afe8-c89c69dafbdc"],
 Cell[CellGroupData[{
-Cell[11947, 261, 974, 20, 121, "Input",ExpressionUUID->"968cad89-e1d8-4900-a2cc-4d0e3fc8e347"],
-Cell[12924, 283, 17421, 565, 451, "Output",ExpressionUUID->"672a9a7e-b8d5-4bf9-abe5-541c7da0effc"]
+Cell[12100, 264, 974, 20, 121, "Input",ExpressionUUID->"968cad89-e1d8-4900-a2cc-4d0e3fc8e347"],
+Cell[13077, 286, 17421, 565, 451, "Output",ExpressionUUID->"672a9a7e-b8d5-4bf9-abe5-541c7da0effc"]
 }, Open  ]],
-Cell[30360, 851, 234, 5, 121, "Input",ExpressionUUID->"4fce5a4c-e437-4504-86eb-038486267ae0"],
-Cell[30597, 858, 2098, 57, 121, "Input",ExpressionUUID->"6b617242-017d-409e-b2ff-dbf80499c16f"],
+Cell[30513, 854, 234, 5, 121, "Input",ExpressionUUID->"4fce5a4c-e437-4504-86eb-038486267ae0"],
+Cell[30750, 861, 2098, 57, 121, "Input",ExpressionUUID->"6b617242-017d-409e-b2ff-dbf80499c16f"],
 Cell[CellGroupData[{
-Cell[32720, 919, 1789, 36, 67, "Input",ExpressionUUID->"ac4f46a1-6c90-48fd-9f94-9b695e8f77e1"],
-Cell[34512, 957, 10757, 239, 318, "Output",ExpressionUUID->"9e32ec00-6095-4d3e-b618-145f340d85c7"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[45306, 1201, 414, 7, 39, "Input",ExpressionUUID->"ece19128-4af5-4887-92e6-3a8180e5bc1f"],
-Cell[45723, 1210, 46423, 898, 823, "Output",ExpressionUUID->"67434e3d-f91c-491a-851d-3bb34afe134c"]
+Cell[32873, 922, 1789, 36, 67, "Input",ExpressionUUID->"ac4f46a1-6c90-48fd-9f94-9b695e8f77e1"],
+Cell[34665, 960, 10757, 239, 323, "Output",ExpressionUUID->"9e32ec00-6095-4d3e-b618-145f340d85c7"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[92183, 2113, 460, 8, 39, "Input",ExpressionUUID->"ed6211ca-1bf5-45c2-a113-39191d6d1266"],
-Cell[92646, 2123, 271, 4, 45, "Output",ExpressionUUID->"e4f98cdf-e7a0-4906-b309-a49fc08c56c9"]
-}, Open  ]],
-Cell[92932, 2130, 154, 3, 39, "Input",ExpressionUUID->"f616cedd-1366-4ada-8066-89283c2a1e83"],
-Cell[CellGroupData[{
-Cell[93111, 2137, 1522, 36, 94, "Input",ExpressionUUID->"341c7aeb-22b2-431e-85bb-6f1cfa156302"],
-Cell[94636, 2175, 70645, 1410, 824, "Output",ExpressionUUID->"cf5e2c1b-087a-4f6c-87ae-f7f2dee4da82"]
+Cell[45459, 1204, 414, 7, 39, "Input",ExpressionUUID->"ece19128-4af5-4887-92e6-3a8180e5bc1f"],
+Cell[45876, 1213, 46423, 898, 824, "Output",ExpressionUUID->"67434e3d-f91c-491a-851d-3bb34afe134c"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[165318, 3590, 235, 3, 39, "Input",ExpressionUUID->"9389e80a-de35-4d0c-bb20-c0e92fc92d1c"],
-Cell[165556, 3595, 9014, 145, 748, "Output",ExpressionUUID->"9a3368c3-e150-4b8d-b0a3-180a1e5f42b9"]
+Cell[92336, 2116, 460, 8, 39, "Input",ExpressionUUID->"ed6211ca-1bf5-45c2-a113-39191d6d1266"],
+Cell[92799, 2126, 271, 4, 45, "Output",ExpressionUUID->"e4f98cdf-e7a0-4906-b309-a49fc08c56c9"]
 }, Open  ]],
-Cell[174585, 3743, 377, 7, 39, "Input",ExpressionUUID->"d52ad79d-6460-43be-a6d0-834a38d44bbc"],
+Cell[93085, 2133, 154, 3, 39, "Input",ExpressionUUID->"f616cedd-1366-4ada-8066-89283c2a1e83"],
 Cell[CellGroupData[{
-Cell[174987, 3754, 1836, 39, 121, "Input",ExpressionUUID->"9d550470-9dc7-401c-a310-42ae913ead65"],
-Cell[176826, 3795, 72963, 1448, 823, "Output",ExpressionUUID->"629c6701-94d4-46ed-990e-fa216546a035"],
-Cell[249792, 5245, 73035, 1450, 823, "Output",ExpressionUUID->"2bf4010d-a581-44ee-88ae-f2b0bcd36e2c"],
-Cell[322830, 6697, 72962, 1449, 823, "Output",ExpressionUUID->"1d1be318-09d8-4a70-ad40-eb6452258c86"],
-Cell[395795, 8148, 72924, 1450, 823, "Output",ExpressionUUID->"7f97e197-553b-4dd7-9d4e-420d3581dfe6"],
-Cell[468722, 9600, 72883, 1446, 823, "Output",ExpressionUUID->"4feade65-958e-4dc0-8354-f31564ce1faf"],
-Cell[541608, 11048, 72865, 1447, 823, "Output",ExpressionUUID->"ff60546d-a93c-4b5e-861a-d198cda26597"],
-Cell[614476, 12497, 46027, 918, 823, "Output",ExpressionUUID->"ad8d1917-a88e-422f-aef2-d620b2e17145"]
+Cell[93264, 2140, 1522, 36, 94, "Input",ExpressionUUID->"341c7aeb-22b2-431e-85bb-6f1cfa156302"],
+Cell[94789, 2178, 70645, 1410, 824, "Output",ExpressionUUID->"cf5e2c1b-087a-4f6c-87ae-f7f2dee4da82"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[660540, 13420, 322, 6, 39, "Input",ExpressionUUID->"95b8995f-f4e3-446d-bfad-fdd497b31c2c"],
-Cell[660865, 13428, 53234, 1072, 823, "Output",ExpressionUUID->"f4a867ee-dd3b-43c5-be7c-9ca1e0a9e33f"]
+Cell[165471, 3593, 235, 3, 39, "Input",ExpressionUUID->"9389e80a-de35-4d0c-bb20-c0e92fc92d1c"],
+Cell[165709, 3598, 9114, 147, 792, "Output",ExpressionUUID->"281c6b1e-9642-46a7-be65-e9a15a9a7289"]
+}, Open  ]],
+Cell[174838, 3748, 377, 7, 39, "Input",ExpressionUUID->"d52ad79d-6460-43be-a6d0-834a38d44bbc"],
+Cell[CellGroupData[{
+Cell[175240, 3759, 1836, 39, 121, "Input",ExpressionUUID->"9d550470-9dc7-401c-a310-42ae913ead65"],
+Cell[177079, 3800, 72963, 1448, 824, "Output",ExpressionUUID->"629c6701-94d4-46ed-990e-fa216546a035"],
+Cell[250045, 5250, 73035, 1450, 823, "Output",ExpressionUUID->"2bf4010d-a581-44ee-88ae-f2b0bcd36e2c"],
+Cell[323083, 6702, 72962, 1449, 823, "Output",ExpressionUUID->"1d1be318-09d8-4a70-ad40-eb6452258c86"],
+Cell[396048, 8153, 72924, 1450, 823, "Output",ExpressionUUID->"7f97e197-553b-4dd7-9d4e-420d3581dfe6"],
+Cell[468975, 9605, 72883, 1446, 823, "Output",ExpressionUUID->"4feade65-958e-4dc0-8354-f31564ce1faf"],
+Cell[541861, 11053, 72865, 1447, 823, "Output",ExpressionUUID->"ff60546d-a93c-4b5e-861a-d198cda26597"],
+Cell[614729, 12502, 46027, 918, 823, "Output",ExpressionUUID->"ad8d1917-a88e-422f-aef2-d620b2e17145"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[714136, 14505, 223, 3, 39, "Input",ExpressionUUID->"3586d9a3-d8bb-4a3c-9bfc-b05af5c5177e"],
-Cell[714362, 14510, 1754, 29, 154, "Output",ExpressionUUID->"5c9b4820-b5e1-4c9b-835e-1558577941ec"]
+Cell[660793, 13425, 322, 6, 39, "Input",ExpressionUUID->"95b8995f-f4e3-446d-bfad-fdd497b31c2c"],
+Cell[661118, 13433, 53234, 1072, 823, "Output",ExpressionUUID->"f4a867ee-dd3b-43c5-be7c-9ca1e0a9e33f"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[716153, 14544, 2201, 38, 67, "Input",ExpressionUUID->"48499641-d397-480d-8476-de76c4a581ce"],
-Cell[718357, 14584, 7096, 147, 127, "Output",ExpressionUUID->"797e1a67-03af-4c25-a0d7-63a74478f692"]
-}, Open  ]],
-Cell[725468, 14734, 2676, 74, 121, "Input",ExpressionUUID->"6f99831e-9f1e-424b-8ac6-58fc193402fd"],
-Cell[728147, 14810, 5855, 129, 229, "Input",ExpressionUUID->"647de4d0-b5fd-453e-b080-b3c2ff00daeb"],
-Cell[734005, 14941, 736, 19, 121, "Input",ExpressionUUID->"7a8b1b78-a4da-4d8b-95db-7979b1a49c56"],
-Cell[CellGroupData[{
-Cell[734766, 14964, 1376, 27, 39, "Input",ExpressionUUID->"e6046595-cf58-4009-8022-c9f0e4d1a463"],
-Cell[736145, 14993, 69348, 1350, 1743, "Output",ExpressionUUID->"f1f53686-0355-43db-b941-b7de74f19a03"]
-}, Open  ]],
-Cell[805508, 16346, 75242, 1474, 2607, InheritFromParent,ExpressionUUID->"9f47b8d9-bd07-46d1-81db-f46e470a6245"],
-Cell[CellGroupData[{
-Cell[880775, 17824, 783, 18, 39, "Input",ExpressionUUID->"19c96672-3333-44ee-81a0-e9e820e0a19f"],
-Cell[881561, 17844, 73658, 1459, 1069, "Output",ExpressionUUID->"7cabfab2-0133-4abd-af25-12f892207301"]
+Cell[714389, 14510, 223, 3, 39, "Input",ExpressionUUID->"3586d9a3-d8bb-4a3c-9bfc-b05af5c5177e"],
+Cell[714615, 14515, 1754, 29, 154, "Output",ExpressionUUID->"5c9b4820-b5e1-4c9b-835e-1558577941ec"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[955256, 19308, 246, 7, 39, "Input",ExpressionUUID->"874cca78-bed0-489f-9b19-b29b4fe4ffb6"],
-Cell[955505, 19317, 186, 3, 45, "Output",ExpressionUUID->"cf850711-e95d-4b2e-a068-942edb92dda0"]
+Cell[716406, 14549, 2201, 38, 67, "Input",ExpressionUUID->"48499641-d397-480d-8476-de76c4a581ce"],
+Cell[718610, 14589, 7096, 147, 127, "Output",ExpressionUUID->"797e1a67-03af-4c25-a0d7-63a74478f692"]
+}, Open  ]],
+Cell[725721, 14739, 2676, 74, 121, "Input",ExpressionUUID->"6f99831e-9f1e-424b-8ac6-58fc193402fd"],
+Cell[728400, 14815, 5855, 129, 229, "Input",ExpressionUUID->"647de4d0-b5fd-453e-b080-b3c2ff00daeb"],
+Cell[734258, 14946, 736, 19, 121, "Input",ExpressionUUID->"7a8b1b78-a4da-4d8b-95db-7979b1a49c56"],
+Cell[CellGroupData[{
+Cell[735019, 14969, 1376, 27, 39, "Input",ExpressionUUID->"e6046595-cf58-4009-8022-c9f0e4d1a463"],
+Cell[736398, 14998, 69348, 1350, 1743, "Output",ExpressionUUID->"f1f53686-0355-43db-b941-b7de74f19a03"]
+}, Open  ]],
+Cell[805761, 16351, 75242, 1474, 2607, InheritFromParent,ExpressionUUID->"9f47b8d9-bd07-46d1-81db-f46e470a6245"],
+Cell[CellGroupData[{
+Cell[881028, 17829, 783, 18, 39, "Input",ExpressionUUID->"19c96672-3333-44ee-81a0-e9e820e0a19f"],
+Cell[881814, 17849, 73658, 1459, 1069, "Output",ExpressionUUID->"7cabfab2-0133-4abd-af25-12f892207301"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[955728, 19325, 1240, 29, 67, "Input",ExpressionUUID->"3d9bbdf9-16a2-4a54-b25a-90c49e36084c"],
-Cell[956971, 19356, 21211, 429, 487, "Output",ExpressionUUID->"75d39200-8f5f-4c51-9e6e-9a7b2e56ea97"]
+Cell[955509, 19313, 246, 7, 39, "Input",ExpressionUUID->"874cca78-bed0-489f-9b19-b29b4fe4ffb6"],
+Cell[955758, 19322, 186, 3, 45, "Output",ExpressionUUID->"cf850711-e95d-4b2e-a068-942edb92dda0"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[978219, 19790, 892, 22, 39, "Input",ExpressionUUID->"6549100c-62d8-457c-b8d0-a22bd76e8007"],
-Cell[979114, 19814, 6346, 147, 314, "Output",ExpressionUUID->"2ac67eb4-2a18-412f-9014-08fca7380274"]
+Cell[955981, 19330, 1240, 29, 67, "Input",ExpressionUUID->"3d9bbdf9-16a2-4a54-b25a-90c49e36084c"],
+Cell[957224, 19361, 21211, 429, 487, "Output",ExpressionUUID->"75d39200-8f5f-4c51-9e6e-9a7b2e56ea97"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[985497, 19966, 236, 5, 39, "Input",ExpressionUUID->"b172ddcb-ede1-44ef-8db9-9faada4285d4"],
-Cell[985736, 19973, 22862, 454, 487, "Output",ExpressionUUID->"5d5af94a-3c5a-417e-94fe-ab966839ba99"]
+Cell[978472, 19795, 892, 22, 39, "Input",ExpressionUUID->"6549100c-62d8-457c-b8d0-a22bd76e8007"],
+Cell[979367, 19819, 6346, 147, 314, "Output",ExpressionUUID->"2ac67eb4-2a18-412f-9014-08fca7380274"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[985750, 19971, 236, 5, 39, "Input",ExpressionUUID->"b172ddcb-ede1-44ef-8db9-9faada4285d4"],
+Cell[985989, 19978, 22862, 454, 487, "Output",ExpressionUUID->"5d5af94a-3c5a-417e-94fe-ab966839ba99"]
 }, Open  ]]
 }
 ]
