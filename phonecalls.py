@@ -7,6 +7,7 @@ import datetime as dt
 import scipy.stats as stats
 import copy
 import os
+import math
 
 def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min_activity=1):
     '''
@@ -350,43 +351,44 @@ def get_b(fresult, xaxis='alpha'):
     g = {}
     r = {}
     for ego in fresult.keys():
-        g[ego] = {}
-        altl = {}
-        for alter in fresult[ego].keys():
-            l = list(fresult[ego][alter]['lambda'].unique())[0]
-            altl[l] = altl.get(l, 0) + 1
-        for alter in fresult[ego].keys():
-            for i in fresult[ego][alter].index:
-                a = fresult[ego][alter].at[i, 'alpha']
-                l = fresult[ego][alter].at[i, 'lambda']
-                f = fresult[ego][alter].at[i, 'f']
-                if xaxis == 'lambda':
-                    g[ego][a] = g[ego].get(a, {})
-                    g[ego][a][l] = g[ego][a].get(l, 0) + f
-                elif xaxis == 'alpha':
-                    g[ego][l] = g[ego].get(l, {})
-                    g[ego][l][a] = g[ego][l].get(a, 0) + f
+        if len(fresult[ego].keys()) > 0:
+            g[ego] = {}
+            altl = {}
+            for alter in fresult[ego].keys():
+                l = list(fresult[ego][alter]['lambda'].unique())[0]
+                altl[l] = altl.get(l, 0) + 1
+            for alter in fresult[ego].keys():
+                for i in fresult[ego][alter].index:
+                    a = fresult[ego][alter].at[i, 'alpha']
+                    l = fresult[ego][alter].at[i, 'lambda']
+                    f = fresult[ego][alter].at[i, 'f']
+                    if xaxis == 'lambda':
+                        g[ego][a] = g[ego].get(a, {})
+                        g[ego][a][l] = g[ego][a].get(l, 0) + f
+                    elif xaxis == 'alpha':
+                        g[ego][l] = g[ego].get(l, {})
+                        g[ego][l][a] = g[ego][l].get(a, 0) + f
 
-        idx = 0
-        df = pd.DataFrame()
-        for k in g[ego].keys():
-            for kk in g[ego][k].keys():
-                if xaxis == 'lambda':
-                    df.at[idx, 'lambda'] = kk
-                    df.at[idx, 'alpha'] = k
-                    df.at[idx, 'g'] = g[ego][k][kk] / altl[kk]
-                    idx += 1
-                elif xaxis == 'alpha':
-                    df.at[idx, 'lambda'] = k
-                    df.at[idx, 'alpha'] = kk
-                    df.at[idx, 'g'] = g[ego][k][kk] / altl[k]
-                    idx += 1
-        if xaxis == 'lambda':
-            df.sort_values(by=['lambda', 'alpha'], inplace=True)
-        elif xaxis == 'alpha':
-            df.sort_values(by=['alpha', 'lambda'], inplace=True)
-        df.reset_index(drop=True, inplace=True)
-        r[ego] = df
+            idx = 0
+            df = pd.DataFrame()
+            for k in g[ego].keys():
+                for kk in g[ego][k].keys():
+                    if xaxis == 'lambda':
+                        df.at[idx, 'lambda'] = kk
+                        df.at[idx, 'alpha'] = k
+                        df.at[idx, 'g'] = g[ego][k][kk] / altl[kk]
+                        idx += 1
+                    elif xaxis == 'alpha':
+                        df.at[idx, 'lambda'] = k
+                        df.at[idx, 'alpha'] = kk
+                        df.at[idx, 'g'] = g[ego][k][kk] / altl[k]
+                        idx += 1
+            if xaxis == 'lambda':
+                df.sort_values(by=['lambda', 'alpha'], inplace=True)
+            elif xaxis == 'alpha':
+                df.sort_values(by=['alpha', 'lambda'], inplace=True)
+            df.reset_index(drop=True, inplace=True)
+            r[ego] = df
     return r
 
 
@@ -501,3 +503,63 @@ def get_avg(df, perclist, tau=0):
         tmp[p] = np.mean(tmp[p])
         
     return tmp
+
+def get_survival(fresult, alphafixed=1, base=2, unbinned=False):
+    '''
+    This function takes as an input an "f dataframe"; and returns a dictionary that uses
+    the gamma bins of activity during month "alphafixed" as keys, and the survival probabilities
+    of alters as the values, in a dataframe. For each value of ell*, there are survival
+    probabilities. The arguments are:
+    fresult             : dataframe created using the get_f method
+    alphafixed          : which bin of a I'm interested in using
+    base                : the base for the "exponential binning"
+    unbinned            : do not create bins of activity, use only the actual value. By
+                          default, this is set to False
+    '''
+    tmp = {}
+    for ego in fresult.keys():
+        for alter in fresult[ego].keys():
+            df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alphafixed]
+            if len(df) > 0:
+                if unbinned:
+                    F = sum(df['f'])
+                else:
+                    F = int(math.log(sum(df['f']), base))
+                tmp[F] = tmp.get(F, {})
+                lamb = df.iloc[0]['lambda']
+                tmp[F][lamb] = tmp[F].get(lamb, 0) + 1
+    tmp2 = {}
+    for F in sorted(tmp.keys()):
+        df = pd.DataFrame.from_dict(tmp[F], orient='index').sort_index()
+        tmp2[F] = {}
+        df['p'] = df[0].div(sum(df[0]))
+        for lc in range(21):
+            df2 = df.loc[df.index >= lc]
+            tmp2[F][lc] = round(sum(df2['p']), 6)
+        tmp2[F] = pd.DataFrame.from_dict(tmp2[F], orient='index').sort_index()
+    return tmp2
+
+def get_plateau(series, allowed=0.5):
+    '''
+    This function obtains the height of the plateau found in the plots of b.
+    The arguments are:
+    series           : This is a particular series produced with the plot_g function
+    allowed          : how much variation do I allow for the vertical axis, before stopping
+                       the plateau serching loop
+    '''
+    x = list(series.index)
+    mid = int(len(x) / 2)
+    xlow, xhigh = x[mid - 1], x[mid + 1]
+    newdf = series.loc[(series.index >= xlow) & (series.index <= xhigh)]
+    grow = 1
+    while (xlow != x[0]) and (xhigh != x[-1]):
+        grow += 1
+        newxmin, newxmax = x[mid - grow], x[mid + grow]
+        tmp = series.loc[(series.index >= newxmin) & (series.index <= newxmax)]
+        epsilon = max(tmp['alpha']) - min(tmp['alpha'])
+        if epsilon >= allowed:
+            break
+        else:
+            xlow, xhigh = newxmin, newxmax
+            newdf = tmp
+    return (xlow, xhigh, np.mean(newdf['alpha']))
