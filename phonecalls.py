@@ -533,7 +533,7 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False):
         df = pd.DataFrame.from_dict(tmp[F], orient='index').sort_index()
         tmp2[F] = {}
         df['p'] = df[0].div(sum(df[0]))
-        for lc in range(21):
+        for lc in range(max(df.index) + 1):
             df2 = df.loc[df.index >= lc]
             tmp2[F][lc] = round(sum(df2['p']), 6)
         tmp2[F] = pd.DataFrame.from_dict(tmp2[F], orient='index').sort_index()
