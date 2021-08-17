@@ -563,3 +563,35 @@ def get_plateau(series, allowed=0.5):
             xlow, xhigh = newxmin, newxmax
             newdf = tmp
     return (xlow, xhigh, np.mean(newdf['alpha']))
+
+def histogram(array, bins, log=True):
+    xl = sorted(list(array))
+    xo = xl[0]
+    xf = xl[-1]
+    if log:
+        lmu = np.log10(xf / xo) / bins
+        mu = 10**lmu
+    dx = (xf - xo) / bins
+    h = {}
+    if log:
+        for x in xl:
+            if x == xf:
+                h[bins - 1] = h.get(bins - 1, 0) + 1
+            else:
+                i = np.log10(x / xo) // lmu
+                h[i] = h.get(i, 0) + 1
+    else:
+        for x in xl:
+            if x == xf:
+                h[bins - 1] += 1
+            else:
+                i = int((x - xo) // dx)
+                h[i] = h.get(i, 0) + 1
+    df = pd.DataFrame.from_dict(h, orient='index', columns=['h'])
+    df['pmf'] = df['h'].div(sum(df['h']))
+    for i in df.index:
+        if log:
+            df.at[i, 'label'] = xo*(mu**i)
+        else:
+            df.at[i, 'label'] = xo + (dx * i)
+    return df
