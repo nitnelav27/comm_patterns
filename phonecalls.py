@@ -583,7 +583,7 @@ def histogram(array, bins, log=True):
     else:
         for x in xl:
             if x == xf:
-                h[bins - 1] += 1
+                h[bins - 1] = h.get(bins - 1, 0) + 1
             else:
                 i = int((x - xo) // dx)
                 h[i] = h.get(i, 0) + 1
