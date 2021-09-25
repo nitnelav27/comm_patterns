@@ -192,6 +192,7 @@ def get_f(callsdf, theego, bina, binell, external_lives=False):
     bina                : the value for \Delta a
     binell              : \Delta ell
     '''
+    callsdf = callsdf.sort_values(by='time')
     if theego != 'all':
         df1 = callsdf.loc[callsdf['ego'] == theego]
     else:
@@ -203,9 +204,9 @@ def get_f(callsdf, theego, bina, binell, external_lives=False):
         df2 = df1.loc[df1['ego'] == ego]
         for alter in df2['alter'].unique():
             df3 = df2.loc[df2['alter'] == alter]
-            df3.sort_values(by='time', inplace=True)
+            df3 = df3.sort_values(by='time')
             if not external_lives:
-                lamb = (df3.iloc[-1]['uclock'] - df3.iloc[0]['uclock']) // binell
+                lamb = (max(df3['uclock']) - min(df3['uclock'])) // binell
             else:
                 lamb = external_lives[ego][alter]['ell'] // binell
             df3['alpha'] = df3['aclock'] // bina
