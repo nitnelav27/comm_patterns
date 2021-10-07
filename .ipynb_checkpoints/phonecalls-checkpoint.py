@@ -95,6 +95,32 @@ def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min
 
     return newdf
 
+def limit_calls(unf_calls, T):
+    '''
+    This method takes a calls dataframe produced with the "allcalls" method
+    and returns a new dataframe with some calls removed. The arguments are:
+    
+    unf_calls          : unfiltered calls dataframe produced with the "allcalls"
+                       method
+    T                  : all lifetime values will be truncated to this parameter.
+    
+    Note that all alters with lifetime > T will be set to ell = T
+    '''
+    df = unf_calls.loc[unf_calls['aclock'] <= T].copy()
+    df['ea'] = list(zip(df['ego'], df['alter']))
+    maxT = max(df['uclock'])
+    mint = df.groupby('ea')[['uclock']].min()
+    mint = mint.loc[mint['uclock'] < (maxT - T)]
+    tokeep = list(mint.index)
+    df2 = df[df['ea'].isin(tokeep)]
+    if 'rm' in df2.columns:
+        df3 = df2.drop(columns = ['aclock', 'rm', 'ea'])
+    else:
+        df3 = df2.drop(columns = ['aclock', 'ea'])
+    df3['aclock'] = df2.index.map(lambda i: df2.at[i, 'uclock'] - mint['uclock'][(df2.at[i, 'ego'], df2.at[i, 'alter'])])
+    df4 = df3.sort_values(by=['ego', 'alter', 'time']).reset_index(drop=True)
+    return df4
+
 def pairs(df):
     '''
     This method creates a dataframe in which every row is an ego-alter pair. It
@@ -596,3 +622,45 @@ def histogram(array, bins, log=True):
         else:
             df.at[i, 'label'] = xo + (dx * i)
     return df
+
+def get_avgfa(fresult, lives, ell0, ellf):
+    '''
+    This method produces the curves of \bar{f}(a). It takes as an input
+    
+    fresult         : dataframe created using the get_f method
+    lives           : a "lives dictionary" produced with the method of the same name
+    ell0            : starting point of the lifetime group (includes this number)
+    ellf            : ending point for the lifetime group (includes this number)
+    
+    Note that the output of this function is a pandas dataframe with a column "f"
+    that contains the Y points to be plotted. The X points are in the index of the
+    dataframe. It will only produce one curve averaging over all egos whose alters
+    have lifetime between ell0 and ellf (inclusive).
+    '''
+    fi = {}
+    for ego in fresult.keys():
+        nalt = 0
+        fi[ego] = {}
+        for alter in fresult[ego].keys():
+            ell = lives[ego][alter]['ell']
+            if (ell >= ell0) and (ell <= ellf):
+                df = fresult[ego][alter]
+                nalt += 1
+                for i in df.index:
+                    a = df.at[i, 'alpha']
+                    f = df.at[i, 'f']
+                    fi[ego][a] = fi[ego].get(a, 0) + f
+        for a in fi[ego].keys():
+            fi[ego][a] /= nalt
+    
+    tmp = {}
+    for ego in fi.keys():
+        for a in fi[ego].keys():
+            tmp[a] = tmp.get(a, [])
+            tmp[a].append(fi[ego][a])
+    for a in tmp.keys():
+        tmp[a] = np.mean(tmp[a])
+        
+    res = pd.DataFrame.from_dict(tmp, orient='index', columns=['f'])
+    res = res.sort_index()
+    return res
