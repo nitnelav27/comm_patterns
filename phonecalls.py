@@ -547,7 +547,10 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False):
     tmp = {}
     for ego in fresult.keys():
         for alter in fresult[ego].keys():
-            df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alphafixed]
+            if type(alphafixed) == int:
+                df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alphafixed]
+            else:
+                df = fresult[ego][alter].loc[(fresult[ego][alter]['alpha'] >= alphafixed[0]) & (fresult[ego][alter]['alpha'] <= alphafixed[1])]
             if len(df) > 0:
                 if unbinned:
                     F = sum(df['f'])
@@ -665,3 +668,125 @@ def get_avgfa(fresult, lives, ell0, ellf):
     res = pd.DataFrame.from_dict(tmp, orient='index', columns=['f'])
     res = res.sort_index()
     return res
+
+
+def consecutive(callsdf, ello, ellf, dayres=1):
+    allie = []
+    cv = []
+    df = callsdf.copy()
+    df['ea'] = list(zip(df['ego'], df['alter']))
+    lifetime = df.groupby('ea')[['aclock']].max()
+    lifetime = lifetime.loc[(lifetime['aclock'] >= ello) & (lifetime['aclock'] <= ellf)]
+    use = list(lifetime.index)
+    df = df[df['ea'].isin(use)]   
+    for ego in df['ego'].unique():
+        df1 = df.loc[df['ego'] == ego]
+        for alter in df1['alter'].unique():
+            df2 = df1.loc[df['alter'] == alter]
+            if len(df2) > 2:
+                df2 = df2.sort_values(by='time')
+                ie = list(df2['aclock'].diff())[1:]
+                if dayres > 1:
+                    ie = [x // dayres for x in ie]
+                allie += ie
+                cvego = np.nanstd(ie) / np.nanmean(ie)
+                if not pd.isna(cvego):
+                    cv.append(np.std(ie) / np.mean(ie))
+    mean = np.mean(cv)
+    std = np.std(cv)
+    H = histogram(allie, 30, log=False)
+    Hcv = histogram(cv, 30, log=False)
+    return (H, Hcv, mean, std)
+
+
+def calls_by_second(callsdf):
+    df = callsdf.copy(deep=True)
+    minT = min(df['time'])
+    df['u'] = (df['time'] - minT).dt.total_seconds()
+    df['ea'] = list(zip(df['ego'], df['alter']))
+    ulocmin = df.groupby('ea')[['u']].min()
+    df['a'] = df.index.map(lambda i: df.at[i, 'u'] - ulocmin['u'][df.at[i, 'ea']])
+    df = df.sort_values(by=['ego', 'alter', 'time'])
+    g = df.groupby('ea')[['time']].count()
+    g = g.loc[g['time'] > 2]
+    df = df[df['ea'].isin(g.index)]
+    df = df.drop(columns=['ea'])
+    return df
+
+
+def consecutive_bys(callsdf, ello, ellf, nolives = True):
+    allie = []
+    cv = []
+    df = callsdf.copy()
+    df['ea'] = list(zip(df['ego'], df['alter']))
+    if type(nolives) != pd.core.frame.DataFrame:
+        lifetime = df.groupby('ea')[['aclock']].max()
+        lifetime = lifetime.loc[(lifetime['aclock'] >= ello) & (lifetime['aclock'] <= ellf)]
+        use = list(lifetime.index)
+    else:
+        df_alt = nolives.copy(deep=True)
+        df_alt['ea'] = list(zip(df_alt['ego'], df_alt['alter']))
+        lifetime = df_alt.groupby('ea')[['aclock']].max()
+        lifetime = lifetime.loc[(lifetime['aclock'] >= ello) & (lifetime['aclock'] <= ellf)]
+        use = list(lifetime.index)
+    df = df[df['ea'].isin(use)]
+    for ego in df['ego'].unique():
+        df1 = df.loc[df['ego'] == ego]
+        for alter in df1['alter'].unique():
+            df2 = df1.loc[df['alter'] == alter]
+            if len(df2) > 1:
+                df2 = df2.sort_values(by='time')
+                ie = list(df2['a'].diff())[1:]
+                allie += ie
+                cvego = np.nanstd(ie) / np.nanmean(ie)
+                if not pd.isna(cvego):
+                    cv.append(np.std(ie) / np.mean(ie))
+
+    mean = np.mean(cv)
+    std = np.std(cv)
+    H = histogram(allie, 30, log=False)
+    Hcv = histogram(cv, 30, log=False)
+    return (H, Hcv, mean, std)
+
+
+def gaps(callsdf, ello, ellf, dayres=1, zero=False):
+    allgaps = []
+    allcv = []
+    df = callsdf.copy()
+    df['ea'] = list(zip(df['ego'], df['alter']))
+    lifetime = df.groupby('ea')[['aclock']].max()
+    lifetime = lifetime.loc[(lifetime['aclock'] >= ello) & (lifetime['aclock'] <= ellf)]
+    df1 = df[df['ea'].isin(lifetime.index)]
+    for ego in df1['ego'].unique():
+        df2 = df1.loc[df1['ego'] == ego]
+        for alter in df2['alter'].unique():
+            df3 = df2.loc[df2['alter'] == alter]
+            if len(df3) > 1:
+                gaps = []
+                df4 = df3.sort_values(by='time')
+                maxa = max(df4['aclock'])
+                d = 0
+                for i in range(maxa + 1):
+                    if i not in df4['aclock'].unique():
+                        d += 1
+                    elif (not zero) and (d != 0):
+                        gaps.append(d)
+                        d = 0
+                    elif zero and d == 0:
+                        gaps.append(d)
+                    elif zero and d > 0:
+                        gaps.append(d)
+                        d = 0                        
+                if dayres > 1:
+                    gaps = [x // dayres for x in gaps]
+                allgaps += gaps
+                cv = np.nanstd(gaps) / np.nanmean(gaps)
+                if not pd.isna(cv):
+                    allcv.append(cv)
+                    
+    H = histogram(allgaps, 30, log=False)
+    H['label'] = H['label'].replace({0:0.1})
+    Hcv = histogram(allcv, 30, log=False)
+    mcv = np.mean(allcv)
+    scv = np.std(allcv)
+    return (H, Hcv, mcv, scv)
