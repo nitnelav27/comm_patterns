@@ -624,7 +624,7 @@ def histogram(array, bins, log=True):
         if log:
             df.at[i, 'label'] = xo*(mu**i)
         else:
-            df.at[i, 'label'] = xo + (dx * i)
+            df.at[i, 'label'] = xo + (dx * (i + 0.5))
     return df
 
 def get_avgfa(fresult, lives, ell0, ellf):
