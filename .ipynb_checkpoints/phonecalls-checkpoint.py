@@ -167,44 +167,38 @@ def lives_dictionary(callsdf):
         result[ego] = df.to_dict('index')
     return result
 
-def remove_alters(callsdf, lives, num_days):
+def apply_filters(unf_calls, T, delta):
     '''
-    If, for some reason, we have to remove alters from the data, this method allows to remove all
-    alters (and phone calls) that appeared before a certain day in the universal clock. It takes
-    the following arguments
-
-    callsdf         : a dataframe produces with the "allcalls" method
-    lives           : a "lives dictionary" produced with the method of the same name
-    num_days        : alters appeared before this day will be removed
-
-    For all analysis purposes, it is recommended to use the methods "lives_dictionary" and
-    "pairs" with the output of this method.
+    This function implements the following filters for the data:
+    
+    1. Removes dtimestamp duplicates for all ego-alter pairs
+    2. Removes all ego-alter pairs with fewer than 3 calls
+    3. Removes all pairs with the last contact in the interval
+       [T - delta, T)
+    4. Removes all alters that due to the time they entered the study,
+       could not have reached lifetime T - delta
     '''
-    rmalter = {}
-    for ego in lives.keys():
-        rmalter[ego] = []
-        for alter in lives[ego].keys():
-            if lives[ego][alter]['t0'] < num_days:
-                rmalter[ego].append(alter)
-
-    tmp = callsdf.loc[callsdf['uclock'] >= num_days]
-    tmp['uclock'] -= num_days
-    tmp.to_csv("tmp.csv")
-    newdf = allcalls("tmp.csv", (), 'ego', 'alter', ['time'], '%Y-%m-%d %H:%M:%S')
-    os.remove("tmp.csv")
-
-    for i in newdf.index:
-        ego = newdf.at[i, 'ego']
-        alter = newdf.at[i, 'alter']
-        if alter in rmalter[ego]:
-            newdf.at[i, 'rm'] = 1
-        else:
-            newdf.at[i, 'rm'] = 0
-
-    newdf = newdf.loc[newdf['rm'] == 0]
-    newdf.drop('rm', axis=1, inplace=True)
-
-    return newdf
+    df = unf_calls.copy(deep=True)
+    df['ea'] = list(zip(df['ego'], df['alter']))
+    df = df.sort_values(by=['ea', 'time'])
+    df['shifted'] = df['time'].shift(-1)
+    df['d'] = (df['shifted'] - df['time']).dt.total_seconds()
+    torm = list(df.loc[df['d'] == 0].index)
+    df = df.drop(torm)
+    df = df.drop(columns = ['shifted', 'd'])    
+    maxu = max(df['uclock'])
+    ncalls = df.groupby('ea')[['time']].count().rename(columns={'time': 'ncalls'})
+    ncalls = ncalls.loc[ncalls['ncalls'] > 2]
+    df = df[df['ea'].isin(ncalls.index)]
+    last = df.groupby('ea')[['uclock']].max().rename(columns={'uclock': 'last'})
+    tokeep = list(last.loc[(last['last'] <= (T - delta)) | (last['last'] > T)].index)
+    df = df[df['ea'].isin(tokeep)]
+    first = df.groupby('ea')[['uclock']].min().rename(columns={'uclock': 'first'})
+    first['diff'] = maxu - first['first']
+    tokeep = list(first.loc[first['diff'] >= (310 - 60)].index)
+    df = df[df['ea'].isin(tokeep)]
+    df = df.drop(columns=['ea']).reset_index(drop=True)
+    return df
 
 
 def get_f(callsdf, theego, bina, binell, external_lives=False):
@@ -624,7 +618,7 @@ def histogram(array, bins, log=True):
         if log:
             df.at[i, 'label'] = xo*(mu**i)
         else:
-            df.at[i, 'label'] = xo + (dx * i)
+            df.at[i, 'label'] = xo + (dx * (i + 0.5))
     return df
 
 def get_avgfa(fresult, lives, ell0, ellf):
