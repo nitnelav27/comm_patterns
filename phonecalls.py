@@ -167,17 +167,16 @@ def lives_dictionary(callsdf):
         result[ego] = df.to_dict('index')
     return result
 
-def apply_filters(unf_calls, T, delta):
+def apply_filters(unf_calls, delta):
     '''
     This function implements the following filters for the data:
     
     1. Removes dtimestamp duplicates for all ego-alter pairs
     2. Removes all ego-alter pairs with fewer than 3 calls
-    3. Removes all pairs with the last contact in the interval
+    3. Removes all pairs with any contact in the interval
        [T - delta, T)
-    4. Removes all alters that due to the time they entered the study,
-       could not have reached lifetime T - delta
     '''
+    T = max(unf_calls['uclock'])
     df = unf_calls.copy(deep=True)
     df['ea'] = list(zip(df['ego'], df['alter']))
     df = df.sort_values(by=['ea', 'time'])
@@ -185,20 +184,15 @@ def apply_filters(unf_calls, T, delta):
     df['d'] = (df['shifted'] - df['time']).dt.total_seconds()
     torm = list(df.loc[df['d'] == 0].index)
     df = df.drop(torm)
-    df = df.drop(columns = ['shifted', 'd'])    
-    maxu = max(df['uclock'])
+    df = df.drop(columns = ['shifted', 'd'])
     ncalls = df.groupby('ea')[['time']].count().rename(columns={'time': 'ncalls'})
     ncalls = ncalls.loc[ncalls['ncalls'] > 2]
     df = df[df['ea'].isin(ncalls.index)]
-    last = df.groupby('ea')[['uclock']].max().rename(columns={'uclock': 'last'})
-    tokeep = list(last.loc[(last['last'] <= (T - delta)) | (last['last'] > T)].index)
-    df = df[df['ea'].isin(tokeep)]
-    first = df.groupby('ea')[['uclock']].min().rename(columns={'uclock': 'first'})
-    first['diff'] = maxu - first['first']
-    tokeep = list(first.loc[first['diff'] >= (310 - 60)].index)
-    df = df[df['ea'].isin(tokeep)]
-    df = df.drop(columns=['ea']).reset_index(drop=True)
-    return df
+    tmp = df.loc[df['uclock'] > (T - delta)]
+    rmpairs = list(tmp['ea'].unique())
+    df2 = df[~df['ea'].isin(rmpairs)]
+    df3 = df2.drop(columns=['ea']).reset_index(drop=True)
+    return df3
 
 
 def get_f(callsdf, theego, bina, binell, external_lives=False):
