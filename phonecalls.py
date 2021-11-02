@@ -5,6 +5,7 @@ import pandas as pd
 import networkx as nx
 import datetime as dt
 import scipy.stats as stats
+import statsmodels.api as sm
 import copy
 import os
 import math
@@ -230,95 +231,7 @@ def get_f(callsdf, theego, bina, binell, external_lives=False):
             f[ego][alter].reset_index(drop=True, inplace=True)
     return f
 
-def plot_f_all(fresult, lives_dict, xaxis, binell):
-    '''
-    This method creates a dataframe to plot the results obtained with the get_f method. It takes as
-    arguments
-
-    fresult             : dataframe created using the get_f method
-    lives_dict          : dictionary obtained with ther method of the same name
-    xaxis               : select "alpha" or "lambda" to choose which quantity to put on the
-                        horizontal axis of the plot.
-    binell              : a value for Delta ell
-
-    The resulting dataframe contains the values chosen for the horizontal axis as indices; and the values
-    for the horizontal axis as the column "h". Note that it produces the sum of all calls for all egos to
-    alters with particular values of lambda and alpha
-    '''
-    result = {}
-    for ego in fresult.keys():
-        for alter in fresult[ego].keys():
-            lamb = lives_dict[ego][alter]['ell'] // binell
-            for i in fresult[ego][alter].index:
-                alpha = fresult[ego][alter].at[i, 'alpha']
-                if xaxis == 'alpha':
-                    result[lamb] = result.get(lamb, {})
-                    result[lamb][alpha] = result[lamb].get(alpha, 0) + fresult[ego][alter].at[i, 'f']
-                elif xaxis == 'lambda':
-                    result[alpha] = result.get(alpha, {})
-                    result[alpha][lamb] = result[alpha].get(lamb, 0) + fresult[ego][alter].at[i, 'f']
-
-    for a in result.keys():
-        result[a] = pd.DataFrame.from_dict(result[a], orient='index', columns=['h'])
-        result[a].sort_index(inplace = True)
-
-    return result
-
-def get_g(fresult, xaxis='alpha'):
-    '''
-    With this method, the number of phone calls PER ALTER can be obtained. It uses the sum of f_i(lambda, alpha)
-    and divides by H(alpha). It only takes two arguments
-    fresult             : dataframe produced with the get_f method
-    xaxis               : this is for future plotting purposes. Which quantity should be
-                        in the horizontal axis? Defaults to "alpha"
-
-    The output is a dictionary with a dataframe per ego.
-    '''
-    g = {}
-    r = {}
-    for ego in fresult.keys():
-        g[ego] = {}
-        alta = {}
-        for alter in fresult[ego].keys():
-            alla = list(fresult[ego][alter]['alpha'])
-            for a in alla:
-                alta[a] = alta.get(a, 0) + 1
-        for alter in fresult[ego].keys():
-            for i in fresult[ego][alter].index:
-                a = fresult[ego][alter].at[i, 'alpha']
-                l = fresult[ego][alter].at[i, 'lambda']
-                f = fresult[ego][alter].at[i, 'f']
-                if xaxis == 'lambda':
-                    g[ego][a] = g[ego].get(a, {})
-                    g[ego][a][l] = g[ego][a].get(l, 0) + f
-                elif xaxis == 'alpha':
-                    g[ego][l] = g[ego].get(l, {})
-                    g[ego][l][a] = g[ego][l].get(a, 0) + f
-
-        idx = 0
-        df = pd.DataFrame()
-        for k in g[ego].keys():
-            for kk in g[ego][k].keys():
-                if xaxis == 'lambda':
-                    df.at[idx, 'lambda'] = kk
-                    df.at[idx, 'alpha'] = k
-                    df.at[idx, 'g'] = g[ego][k][kk] / alta[k]
-                    idx += 1
-                elif xaxis == 'alpha':
-                    df.at[idx, 'lambda'] = k
-                    df.at[idx, 'alpha'] = kk
-                    df.at[idx, 'g'] = g[ego][k][kk] / alta[kk]
-                    idx += 1
-        if xaxis == 'lambda':
-            df.sort_values(by=['lambda', 'alpha'], inplace=True)
-        elif xaxis == 'alpha':
-            df.sort_values(by=['alpha', 'lambda'], inplace=True)
-        df.reset_index(drop=True, inplace=True)
-        r[ego] = df
-    return r
-
-
-def plot_g(gresult, xaxis):
+def plot_b(gresult, xaxis='alpha'):
     '''
     This method is used to produce one dataframe per ego, where the results from
     the get_g method can be easily plotted. The argumentsd are:
@@ -355,7 +268,7 @@ def plot_g(gresult, xaxis):
 
 def get_b(fresult, xaxis='alpha'):
     '''
-    This is an alternative measurement to g. Instead of dividing the sum of f_i(lambda, alpha) by
+    Instead of dividing the sum of f_i(lambda, alpha) by
     H(alpha), it does it by H(lambda). The arguments are:
     fresult             : dataframe produced with the get_f method
     xaxis               : this is for future plotting purposes. Which quantity should be
@@ -407,119 +320,6 @@ def get_b(fresult, xaxis='alpha'):
             r[ego] = df
     return r
 
-
-def f_histell(fresult, alpha_fixed, cut_points, uptoapoint=False, binned=False, deltaF=5):
-    test = {}
-    if uptoapoint:
-        for ego in fresult.keys():
-            for alter in fresult[ego].keys():
-                df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alpha_fixed]
-                if len(df) > 0:
-                    lamb = df.iloc[0]['lambda']
-                    for f in df['f']:
-                        for cut in cut_points:
-                            if f < cut:
-                                df2 = df.loc[df['f'] < cut]
-                                test[cut_points.index(cut)] = test.get(cut_points.index(cut), {})
-                                test[cut_points.index(cut)][lamb] = test[cut_points.index(cut)].get(lamb, 0) + 1
-                                
-    elif binned:
-        for ego in fresult.keys():
-            for alter in fresult[ego].keys():
-                fresult[ego][alter]['phi'] = fresult[ego][alter]['f'] // deltaF
-                df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alpha_fixed]
-                if len(df) > 0:
-                    lamb = df.iloc[0]['lambda']
-                    for phi in df['phi'].unique():
-                        df2 = df.loc[df['phi'] == phi]
-                        test[phi] = test.get(phi, {})
-                        #test[phi][lamb] = test[phi].get(lamb, 0) + sum(df2['f'])
-                        test[phi][lamb] = test[phi].get(lamb, 0) + 1
-                
-                            
-    else:
-        cutp = [0] + cut_points
-        for ego in fresult.keys():
-            for alter in fresult[ego].keys():
-                df = fresult[ego][alter].loc[fresult[ego][alter]['alpha'] == alpha_fixed]
-                if len(df) > 0:
-                    lamb = df.iloc[0]['lambda']
-                    for i in range(len(cutp) - 1):
-                        df2 = df.loc[(df['f'] >= cutp[i]) & (df['f'] < cutp[i + 1])]
-                        test[i] = test.get(i, {})
-                        test[i][lamb] = test[i].get(lamb, 0) + 1
-                        
-
-    for i in test.keys():
-        test[i] = pd.DataFrame.from_dict(test[i], orient='index')
-        test[i].sort_index(inplace=True)
-        
-    return test
-
-def hatf(callsdf, lives_dict, deltat = 2000):
-    result = {}
-    result['all'] = {}
-    df2all = {}
-    numtall = max(callsdf['uclock']) // deltat
-    for ego in callsdf['ego'].unique():
-        result[ego] = {}
-        df = callsdf.loc[callsdf['ego'] == ego]
-        df2 = {}
-        numt = max(df['uclock']) // deltat
-        for tau in range(numt + 1):
-            df2[tau] = df.loc[(df['uclock'] >= tau * deltat) & (df['uclock'] < (tau + 1) * deltat)]
-            altersell = [lives_dict[ego][alter]['ell'] for alter in df2[tau]['alter'].unique()]
-            altersell.sort()
-            for alter in df2[tau]['alter'].unique():
-                ell = lives_dict[ego][alter]['ell']
-                per = int(stats.percentileofscore(altersell, ell))
-                df3 = df2[tau].loc[df2[tau]['alter'] == alter]
-                result[ego][tau] = result[ego].get(tau, {})
-                result['all'][tau] = result['all'].get(tau, {})
-                result[ego][tau][per] = result[ego][tau].get(per, 0) + len(df3)
-                result['all'][tau][per] = result['all'][tau].get(per, 0) + len(df3)
-    res2 = {}
-    for ego in result.keys():
-        res2[ego] = {}
-        for tau in result[ego].keys():
-            res2[ego][tau] = pd.DataFrame.from_dict(result[ego][tau], orient='index', columns=['f'])
-            res2[ego][tau].sort_index(inplace=True)
-            res2[ego][tau]['tmp'] = res2[ego][tau]['f'].div(sum(res2[ego][tau]['f']))
-            res2[ego][tau]['ftil'] = res2[ego][tau]['tmp'].cumsum()
-            res2[ego][tau].drop(columns=['tmp'], inplace=True)
-            
-    return res2
-
-def get_avg(df, perclist, tau=0):
-    '''
-    df must be produced with the hatf function
-    '''
-    tmp = {}
-    for ego in df.keys():
-        if ego != 'all':
-            df1 = df[ego][tau]
-            thisp = list(df1.index)
-            for p in perclist:
-                if p in thisp:
-                    tmp[p] = tmp.get(p, [])
-                    tmp[p].append(df1.at[p, 'ftil'])
-                else:
-                    for pp in range(len(thisp) - 1):
-                        if ((p > thisp[pp]) and (p < thisp[pp + 1])) or (p < thisp[0]):
-                            x0 = thisp[pp]
-                            y0 = df1.at[x0, 'ftil']
-                            x1 = thisp[pp + 1]
-                            y1 = df1.at[x1, 'ftil']
-                            break
-                    m = (y1 - y0) / (x1 - x0)
-                    F = (m * p) + y0 - (m * x0)
-                    tmp[p] = tmp.get(p, [])
-                    tmp[p].append(F)
-    for p in tmp.keys():
-        tmp[p] = np.mean(tmp[p])
-        
-    return tmp
-
 def get_survival(fresult, alphafixed=1, base=2, unbinned=False):
     '''
     This function takes as an input an "f dataframe"; and returns a dictionary that uses
@@ -558,30 +358,41 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False):
         tmp2[F] = pd.DataFrame.from_dict(tmp2[F], orient='index').sort_index()
     return tmp2
 
-def get_plateau(series, allowed=0.5):
+def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
     '''
-    This function obtains the height of the plateau found in the plots of b.
-    The arguments are:
-    series           : This is a particular series produced with the plot_g function
-    allowed          : how much variation do I allow for the vertical axis, before stopping
-                       the plateau serching loop
+    This function obtains the height of the plateau found in the plots of \bar{f}(a).
+    If it does not find a plateau by looking at the slopes of lines produced with an 
+    OLS estimation, it draws a line with height equal to the average of the heights 
+    in the interval [mina + arbxo, mina - arbxf]. The arguments are:
+    
+    series           : This is a particular series that contains the values for \bar{f}(a)
+    pstar            : The minimum p-value accepted to asume the line has slope 0. defaults to 0.1
+    arbxo            : If I did not find a plateau, arbitrarily use mina + arbxo as the starting point
+    arbxf            : If I did not find a plateau, arbitrarily use maxa - arbxf as the ending point
+    
+    Returns a list with the coordinates of the two points that delimit the line.
     '''
-    x = list(series.index)
-    mid = int(len(x) / 2)
-    xlow, xhigh = x[mid - 1], x[mid + 1]
-    newdf = series.loc[(series.index >= xlow) & (series.index <= xhigh)]
-    grow = 1
-    while (xlow != x[0]) and (xhigh != x[-1]):
-        grow += 1
-        newxmin, newxmax = x[mid - grow], x[mid + grow]
-        tmp = series.loc[(series.index >= newxmin) & (series.index <= newxmax)]
-        epsilon = max(tmp['alpha']) - min(tmp['alpha'])
-        if epsilon >= allowed:
-            break
-        else:
-            xlow, xhigh = newxmin, newxmax
-            newdf = tmp
-    return (xlow, xhigh, np.mean(newdf['alpha']))
+    mida = max(series.index) // 2
+    for i in range(1, mida + 1):
+        newdf = series.loc[(series.index >= mida - i) & (series.index <= mida + i)]
+        if len(newdf) > 1:
+            X, Y = sm.add_constant(newdf.index), newdf['f']
+            tmp = sm.OLS(Y, X).fit()
+            if tmp.pvalues[1] < pstar:
+                df = series.loc[(series.index >= mida - (i - 1)) & (series.index <= mida + (i - 1))]
+                xo, yo = min(df.index), np.mean(df['f'])
+                xf, yf = max(df.index), yo
+                if xo == xf:
+                    continue
+                else:
+                    return [(xo, yo), (xf, yf)]
+    else:
+        xo = min(series.index) + arbxo
+        xf = max(series.index) - arbxf
+        df = (series.loc[(series.index >= xo) & (series.index <= xf)])
+        yo = np.mean(df['f'])
+        yf = yo
+        return [(xo, yo), (xf, yf)]
 
 def histogram(array, bins, log=True):
     xl = sorted(list(array))
@@ -656,6 +467,55 @@ def get_avgfa(fresult, lives, ell0, ellf):
     res = pd.DataFrame.from_dict(tmp, orient='index', columns=['f'])
     res = res.sort_index()
     return res
+
+def get_fal(calls, ello, ellf, bina):
+    '''
+    Similar to the get_avgfa() function on this module. The main difference
+    is that in this function there is no intermidiate step. From the calls
+    dataframe, I obtain the lifetime of alters and place them in the interval
+    of interest, or not. The arguments are
+    
+    calls             : a dataframe produced with the "allcalls" or "apply_filters" methods
+    ello              : lowest lifetime (in days) to keep
+    ellf              : highest lifetime (in days) to keep
+    bina              : value for Delta a
+    
+    The function returns a dictionary with two keys. The key "f" holds the values for 
+    \bar{f}(alpha). The key "fi" contains a dictionary in which each entry is an ego, and 
+    the values stored are \bar{f}_{i}(alpha) 
+    '''
+    df = calls.copy(deep=True)
+    df['ea'] = list(zip(df['ego'], df['alter']))
+    lf = df.groupby('ea')[['aclock']].max()
+    lf = lf.loc[(lf['aclock'] >= ello) & (lf['aclock'] <= ellf)]
+    df = df[df['ea'].isin(lf.index)]
+    fi = {}
+    maxt = 0
+    for ego in df['ego'].unique():
+        df1 = df.loc[df['ego'] == ego]
+        mina = min(df1['aclock'])
+        df2 = df1.copy()
+        df2['a'] = df1['aclock'] // bina
+        callsa = df2.groupby('a')[['time']].count().rename({'time': 'f'}, axis='columns')
+        callsa['f'] /= len(df2['alter'].unique())
+        callsa = callsa.sort_index()
+        fi[ego] = callsa
+    
+    tmp = {}
+    for ego in fi.keys():
+        for i in fi[ego].index:
+            tmp[i] = tmp.get(i, [])
+            tmp[i].append(fi[ego].at[i, 'f'])
+            
+    tmp2 = {}
+    for i in tmp.keys():
+        tmp2[i] = np.nanmean(tmp[i])
+        
+    if len(tmp) > 1:
+        f = pd.DataFrame.from_dict(tmp2, orient='index')
+        f = f.sort_index()
+        f.columns = ['f']
+        return {'f': f, 'fi': fi}
 
 
 def consecutive(callsdf, ello, ellf, dayres=1):
