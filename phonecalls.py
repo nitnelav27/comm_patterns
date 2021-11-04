@@ -320,7 +320,7 @@ def get_b(fresult, xaxis='alpha'):
             r[ego] = df
     return r
 
-def get_survival(fresult, alphafixed=1, base=2, unbinned=False):
+def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999):
     '''
     This function takes as an input an "f dataframe"; and returns a dictionary that uses
     the gamma bins of activity during month "alphafixed" as keys, and the survival probabilities
@@ -344,9 +344,10 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False):
                     F = sum(df['f'])
                 else:
                     F = int(math.log(sum(df['f']), base))
-                tmp[F] = tmp.get(F, {})
                 lamb = df.iloc[0]['lambda']
-                tmp[F][lamb] = tmp[F].get(lamb, 0) + 1
+                if lamb <= lambdamax:
+                    tmp[F] = tmp.get(F, {})
+                    tmp[F][lamb] = tmp[F].get(lamb, 0) + 1
     tmp2 = {}
     for F in sorted(tmp.keys()):
         df = pd.DataFrame.from_dict(tmp[F], orient='index').sort_index()
