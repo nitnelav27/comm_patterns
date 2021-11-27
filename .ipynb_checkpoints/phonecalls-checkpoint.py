@@ -320,7 +320,7 @@ def get_b(fresult, xaxis='alpha'):
             r[ego] = df
     return r
 
-def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999):
+def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999, countA=False):
     '''
     This function takes as an input an "f dataframe"; and returns a dictionary that uses
     the gamma bins of activity during month "alphafixed" as keys, and the survival probabilities
@@ -333,6 +333,7 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999):
                           default, this is set to False
     '''
     tmp = {}
+    altcount = {}
     for ego in fresult.keys():
         for alter in fresult[ego].keys():
             if type(alphafixed) == int:
@@ -347,6 +348,7 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999):
                 lamb = df.iloc[0]['lambda']
                 if lamb <= lambdamax:
                     tmp[F] = tmp.get(F, {})
+                    altcount[F] = altcount.get(F, 0) + 1
                     tmp[F][lamb] = tmp[F].get(lamb, 0) + 1
     tmp2 = {}
     for F in sorted(tmp.keys()):
@@ -357,7 +359,10 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999):
             df2 = df.loc[df.index >= lc]
             tmp2[F][lc] = round(sum(df2['p']), 6)
         tmp2[F] = pd.DataFrame.from_dict(tmp2[F], orient='index').sort_index()
-    return tmp2
+    if countA:
+        return (tmp2, altcount)
+    else:
+        return tmp2
 
 def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
     '''
