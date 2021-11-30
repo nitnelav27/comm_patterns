@@ -432,7 +432,7 @@ def histogram(array, bins, log=True):
             df.at[i, 'label'] = xo + (dx * (i + 0.5))
     return df
 
-def get_avgfa(fresult, lives, ell0, ellf):
+def get_avgfa(fresult, lives, ell0, ellf, countalt=False):
     '''
     This method produces the curves of \bar{f}(a). It takes as an input
     
@@ -447,6 +447,7 @@ def get_avgfa(fresult, lives, ell0, ellf):
     have lifetime between ell0 and ellf (inclusive).
     '''
     fi = {}
+    unialt = 0
     for ego in fresult.keys():
         nalt = 0
         fi[ego] = {}
@@ -455,6 +456,7 @@ def get_avgfa(fresult, lives, ell0, ellf):
             if (ell >= ell0) and (ell <= ellf):
                 df = fresult[ego][alter]
                 nalt += 1
+                unialt += 1
                 for i in df.index:
                     a = df.at[i, 'alpha']
                     f = df.at[i, 'f']
@@ -472,9 +474,12 @@ def get_avgfa(fresult, lives, ell0, ellf):
         
     res = pd.DataFrame.from_dict(tmp, orient='index', columns=['f'])
     res = res.sort_index()
-    return res
+    if countalt:
+        return (res, unialt)
+    else:
+        return res
 
-def get_fal(calls, ello, ellf, bina):
+def get_fal(calls, ello, ellf, bina, countalters=False):
     '''
     Similar to the get_avgfa() function on this module. The main difference
     is that in this function there is no intermidiate step. From the calls
@@ -495,6 +500,7 @@ def get_fal(calls, ello, ellf, bina):
     lf = df.groupby('ea')[['aclock']].max()
     lf = lf.loc[(lf['aclock'] >= ello) & (lf['aclock'] <= ellf)]
     df = df[df['ea'].isin(lf.index)]
+    nalters = len(df['ea'].unique())
     fi = {}
     maxt = 0
     for ego in df['ego'].unique():
@@ -521,7 +527,10 @@ def get_fal(calls, ello, ellf, bina):
         f = pd.DataFrame.from_dict(tmp2, orient='index')
         f = f.sort_index()
         f.columns = ['f']
-        return {'f': f, 'fi': fi}
+        if countalters:
+            return {'f': f, 'fi': fi, 'nalters': nalters}
+        else:
+            return {'f': f, 'fi': fi}
 
 
 def consecutive(callsdf, ello, ellf, dayres=1):
