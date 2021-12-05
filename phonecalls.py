@@ -448,6 +448,7 @@ def get_avgfa(fresult, lives, ell0, ellf, countalt=False):
     '''
     fi = {}
     unialt = 0
+    egolist = []
     for ego in fresult.keys():
         nalt = 0
         fi[ego] = {}
@@ -457,6 +458,8 @@ def get_avgfa(fresult, lives, ell0, ellf, countalt=False):
                 df = fresult[ego][alter]
                 nalt += 1
                 unialt += 1
+                if ego not in egolist:
+                    egolist.append(ego)
                 for i in df.index:
                     a = df.at[i, 'alpha']
                     f = df.at[i, 'f']
@@ -475,7 +478,7 @@ def get_avgfa(fresult, lives, ell0, ellf, countalt=False):
     res = pd.DataFrame.from_dict(tmp, orient='index', columns=['f'])
     res = res.sort_index()
     if countalt:
-        return (res, unialt)
+        return (res, unialt, len(egolist))
     else:
         return res
 
@@ -501,6 +504,7 @@ def get_fal(calls, ello, ellf, bina, countalters=False):
     lf = lf.loc[(lf['aclock'] >= ello) & (lf['aclock'] <= ellf)]
     df = df[df['ea'].isin(lf.index)]
     nalters = len(df['ea'].unique())
+    egocount = len(df['ego'].unique())
     fi = {}
     maxt = 0
     for ego in df['ego'].unique():
@@ -528,7 +532,7 @@ def get_fal(calls, ello, ellf, bina, countalters=False):
         f = f.sort_index()
         f.columns = ['f']
         if countalters:
-            return {'f': f, 'fi': fi, 'nalters': nalters}
+            return {'f': f, 'fi': fi, 'nalters': nalters, 'egocount':egocount}
         else:
             return {'f': f, 'fi': fi}
 
@@ -653,3 +657,38 @@ def gaps(callsdf, ello, ellf, dayres=1, zero=False):
     mcv = np.mean(allcv)
     scv = np.std(allcv)
     return (H, Hcv, mcv, scv)
+
+def get_b_slopes(series, patternsize=3, FlagConverge=False):
+    allslopes = []
+    X = list(series.index)
+    N = len(X)
+    xo, xf = X[0], X[-1]
+    yo, yf = series.at[xo, 'f'], series.at[xf, 'f']
+    slope = (yf - yo) / (xf - xo)
+    allslopes.append(slope)
+    for i in range(1, N):
+        newx = X[i // 2: N - ((i + 1) // 2)]
+        if len(newx) > 1:
+            xo, xf = newx[0], newx[-1]
+            yo, yf = series.at[xo, 'f'], series.at[xf, 'f']
+            slope = (yf - yo) / (xf - xo)
+            allslopes.append(slope)
+        else:
+            xo, xf = X[1], X[-2]
+            df = series.loc[(series.index >= xo) & (series.index <= xf)]
+            yo = np.mean(df['f'])
+            yf = yo
+            if FlagConverge:
+                return [[xo, xf], [yo, yf], False]
+            else:
+                return [[xo, xf], [yo, yf]]
+        if (len(allslopes) >= patternsize):
+            checkSlopes = list(np.sign(allslopes[-patternsize:]))
+            if checkSlopes.count(checkSlopes[0]) != len(checkSlopes):
+                df = series.loc[(series.index >= xo) & (series.index <= xf)]
+                yo = np.mean(df['f'])
+                yf = yo
+                if FlagConverge:
+                    return [[xo, xf], [yo, yf], True]
+                else:
+                    return [[xo, xf], [yo, yf]]
