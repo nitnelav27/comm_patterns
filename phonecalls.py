@@ -320,17 +320,26 @@ def get_b(fresult, xaxis='alpha'):
             r[ego] = df
     return r
 
-def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999, countA=False):
+def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999, countA=False, externalell=False, Dell=10):
     '''
     This function takes as an input an "f dataframe"; and returns a dictionary that uses
     the gamma bins of activity during month "alphafixed" as keys, and the survival probabilities
     of alters as the values, in a dataframe. For each value of ell*, there are survival
     probabilities. The arguments are:
     fresult             : dataframe created using the get_f method
-    alphafixed          : which bin of a I'm interested in using
+    alphafixed          : which bin of a I'm interested in using. If a tuple is passed, it will use alters with
+                          the a delimited by the first and last values of the tuple. Default value is 1
     base                : the base for the "exponential binning"
     unbinned            : do not create bins of activity, use only the actual value. By
                           default, this is set to False
+    lambdamax           : Ignore any lifetime (binned) value greater than this. Default is 9999
+    countA              : Count alters for each series of g. Defaults to False. If True, the function returns
+                          a tuple with the first element being the usual result, and the second element 
+                          the number of alters
+    externalell         : If False, it will extract ell (binned) from the fresult dataframe. If a dictionary is supplied,
+                          it will extract lifetimes from here. The dictionary supplied must come from the lives_dictionary
+                          function. Defaults to False.
+    Dell                : Delta ell to be used. Only considered when the externalell argument is not false. Defaults to 10.
     '''
     tmp = {}
     altcount = {}
@@ -345,7 +354,10 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999, c
                     F = sum(df['f'])
                 else:
                     F = int(math.log(sum(df['f']), base))
-                lamb = df.iloc[0]['lambda']
+                if type(externalell) == bool:
+                    lamb = df.iloc[0]['lambda']
+                else:
+                    lamb = externalell[ego][alter]['ell'] // Dell
                 if lamb <= lambdamax:
                     tmp[F] = tmp.get(F, {})
                     altcount[F] = altcount.get(F, 0) + 1
