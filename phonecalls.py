@@ -465,17 +465,18 @@ def get_avgfa(fresult, lives, ell0, ellf, countalt=False):
         nalt = 0
         fi[ego] = {}
         for alter in fresult[ego].keys():
-            ell = lives[ego][alter]['ell']
-            if (ell >= ell0) and (ell <= ellf):
-                df = fresult[ego][alter]
-                nalt += 1
-                unialt += 1
-                if ego not in egolist:
-                    egolist.append(ego)
-                for i in df.index:
-                    a = df.at[i, 'alpha']
-                    f = df.at[i, 'f']
-                    fi[ego][a] = fi[ego].get(a, 0) + f
+            if (ego in lives.keys()) and (alter in lives[ego].keys()):
+                ell = lives[ego][alter]['ell']
+                if (ell >= ell0) and (ell <= ellf):
+                    df = fresult[ego][alter]
+                    nalt += 1
+                    unialt += 1
+                    if ego not in egolist:
+                        egolist.append(ego)
+                    for i in df.index:
+                        a = df.at[i, 'alpha']
+                        f = df.at[i, 'f']
+                        fi[ego][a] = fi[ego].get(a, 0) + f
         for a in fi[ego].keys():
             fi[ego][a] /= nalt
     
