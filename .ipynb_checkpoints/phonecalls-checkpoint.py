@@ -2,10 +2,10 @@
 
 import numpy as np
 import pandas as pd
-import networkx as nx
 import datetime as dt
 import scipy.stats as stats
 import statsmodels.api as sm
+import pymannkendall as mk
 import copy
 import os
 import math
@@ -672,6 +672,24 @@ def gaps(callsdf, ello, ellf, dayres=1, zero=False):
     return (H, Hcv, mcv, scv)
 
 def get_b_slopes(series, patternsize=3, FlagConverge=False):
+    '''
+    This method takes a series of f(a) and gets the "steady region" height. To do this, the algorith works by
+    1. Start with the complete series, and calculate the slope between the f(a = 0) and f(a = max(a)).
+    2. Remove the last point and calculate the slope of the line between f(a = 0) and f(a = max(a) - 1).
+    3. Remove the first point and calculate the slope between f(a = 1) and f(a = max(a) - 1).
+    4. Whenever the slope has a different sign in the past three ietration, stop the algorithm and 
+       return the value of b. If the slope has the same signs for the past three ieterations, repeats steps
+       1, 2, and 3 evaluating at every step.
+       
+    The arguments for this function are:
+    series          : the series of f(a) to obtain b(ell)
+    patternsize     : how many iteration to look for the pattern breaking. Defaults to 3
+    FlagConverge    : If True, flags whenever the algorithm did not converge. I.e. there was no steady plateau.
+                      Defaults to False.
+                      
+    This function returns a list with the following elements: the values for the starting and ending points in
+    the horizontal axis; the values for the vertical axis; and wheter the algorithm converged or not.
+    '''
     allslopes = []
     X = list(series.index)
     N = len(X)
@@ -705,3 +723,33 @@ def get_b_slopes(series, patternsize=3, FlagConverge=False):
                     return [[xo, xf], [yo, yf], True]
                 else:
                     return [[xo, xf], [yo, yf]]
+                
+def get_b_mk(series):
+    '''
+    This method takes a series of f(a) and gets the "steady region" height. It does it by using the Mann-Kendall
+    test for trends. If it finds a trend, the algorithm keeps iterating. When it find no trend, it will output
+    coordinates for the x and y axes.
+    
+    The arguments for this function are:
+    series          : the series of f(a) to obtain b(ell)
+    
+    This function returns a list with the following elements: the values for the starting and ending points in
+    the horizontal axis; the values for the vertical axis;
+    '''
+    for i in range(max(series.index) // 2):
+        df = series.loc[(series.index >= (0 + i)) & (series.index <= (max(series.index) - i))]
+        tmp = mk.original_test(df['f'])
+        if tmp[0] == 'no trend':
+            df = series.loc[(series.index >= (0 + i - 1)) & (series.index <= (max(series.index) - i + 1))]
+            xo = min(df.index)
+            xf = max(df.index)
+            yo = np.mean(df['f'])
+            yf = yo
+            return [[xo, xf], [yo, yf]]
+    else:
+        df = series.loc[(series.index >= (0 + 1)) & (series.index <= (max(series.index) - 1))]
+        xo = min(df.index)
+        xf = max(df.index)
+        yo = np.mean(df['f'])
+        yf = yo
+        return [[xo, xf], [yo, yf]]
