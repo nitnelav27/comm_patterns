@@ -747,7 +747,10 @@ def get_b_mk(series):
             yf = yo
             return [[xo, xf], [yo, yf]]
     else:
-        df = series.loc[(series.index >= (0 + 1)) & (series.index <= (max(series.index) - 1))]
+        if len(series) > 3:
+            df = series.loc[(series.index >= (0 + 1)) & (series.index <= (max(series.index) - 1))]
+        else:
+            df = series.copy()
         xo = min(df.index)
         xf = max(df.index)
         yo = np.mean(df['f'])
