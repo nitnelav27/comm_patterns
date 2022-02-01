@@ -677,7 +677,7 @@ def get_b_slopes(series, patternsize=3, FlagConverge=False):
     1. Start with the complete series, and calculate the slope between the f(a = 0) and f(a = max(a)).
     2. Remove the last point and calculate the slope of the line between f(a = 0) and f(a = max(a) - 1).
     3. Remove the first point and calculate the slope between f(a = 1) and f(a = max(a) - 1).
-    4. Whenever the slope has a different sign in the past three ietration, stop the algorithm and 
+    4. Whenever the slope has a different sign in the past three iterations, stop the algorithm and 
        return the value of b. If the slope has the same signs for the past three ieterations, repeats steps
        1, 2, and 3 evaluating at every step.
        
@@ -724,7 +724,7 @@ def get_b_slopes(series, patternsize=3, FlagConverge=False):
                 else:
                     return [[xo, xf], [yo, yf]]
                 
-def get_b_mk(series):
+def get_b_mk(series, FlagConverge=False):
     '''
     This method takes a series of f(a) and gets the "steady region" height. It does it by using the Mann-Kendall
     test for trends. If it finds a trend, the algorithm keeps iterating. When it find no trend, it will output
@@ -736,23 +736,30 @@ def get_b_mk(series):
     This function returns a list with the following elements: the values for the starting and ending points in
     the horizontal axis; the values for the vertical axis;
     '''
-    for i in range(max(series.index) // 2):
-        df = series.loc[(series.index >= (0 + i)) & (series.index <= (max(series.index) - i))]
-        tmp = mk.original_test(df['f'])
-        if tmp[0] == 'no trend':
-            df = series.loc[(series.index >= (0 + i - 1)) & (series.index <= (max(series.index) - i + 1))]
-            xo = min(df.index)
-            xf = max(df.index)
-            yo = np.mean(df['f'])
-            yf = yo
-            return [[xo, xf], [yo, yf]]
-    else:
-        if len(series) > 3:
-            df = series.loc[(series.index >= (0 + 1)) & (series.index <= (max(series.index) - 1))]
+    X = sorted(list(series.index))
+    N = len(series)
+    q = 0
+    tmp = mk.original_test(series['f'])
+    if tmp[0] == 'notrend':
+        if FlagConverge:
+            return [[X[0], X[-1]], [np.mean(series['f']), np.mean(series['f'])], True, q]
         else:
-            df = series.copy()
-        xo = min(df.index)
-        xf = max(df.index)
-        yo = np.mean(df['f'])
-        yf = yo
-        return [[xo, xf], [yo, yf]]
+            return [[X[0], X[-1]], [np.mean(series['f']), np.mean(series['f'])], q]
+    else:
+        for i in range(1, N):
+            newx = X[i // 2: N - ((i + 1) // 2)]
+            df = series.loc[(series.index >= newx[0]) & (series.index <= newx[-1])]
+            if len(df) > 1:
+                tmp = mk.original_test(df['f'])
+                if tmp[0] == 'notrend':
+                    if FlagConverge:
+                        return [[newx[0], newx[-1]], [np.mean(df['f']), np.mean(df['f'])], True, q]
+                    else:
+                        return [[newx[0], newx[-1]], [np.mean(df['f']), np.mean(df['f'])], q]
+                    q += 1
+        else:
+            df = series.loc[(series.index >= X[1]) & (series.index <= X[-2])]
+            if FlagConverge:
+                return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
+            else:
+                return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
