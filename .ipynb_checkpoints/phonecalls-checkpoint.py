@@ -412,12 +412,12 @@ def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
         yf = yo
         return [(xo, yo), (xf, yf)]
 
-def histogram(array, bins, log=True):
+def histogram(array, bins, log=True, base=10):
     xl = sorted(list(array))
     xo = xl[0]
     xf = xl[-1]
     if log:
-        lmu = np.log10(xf / xo) / bins
+        lmu = math.log(xf / xo, base) / bins
         mu = 10**lmu
     dx = (xf - xo) / bins
     h = {}
@@ -699,11 +699,20 @@ def get_b_slopes(series, patternsize=3, FlagConverge=False):
     allslopes.append(slope)
     for i in range(1, N):
         newx = X[i // 2: N - ((i + 1) // 2)]
-        if len(newx) > 1:
+        if len(newx) >= 3:
             xo, xf = newx[0], newx[-1]
             yo, yf = series.at[xo, 'f'], series.at[xf, 'f']
             slope = (yf - yo) / (xf - xo)
             allslopes.append(slope)
+        elif len(X) < 3:
+            xo, xf = X[0], X[-1]
+            df = series.loc[(series.index >= xo) & (series.index <= xf)]
+            yo = np.mean(df['f'])
+            yf = yo
+            if FlagConverge:
+                return [[xo, xf], [yo, yf], False]
+            else:
+                return [[xo, xf], [yo, yf]]
         else:
             xo, xf = X[1], X[-2]
             df = series.loc[(series.index >= xo) & (series.index <= xf)]
@@ -759,7 +768,14 @@ def get_b_mk(series, FlagConverge=False):
                     q += 1
         else:
             df = series.loc[(series.index >= X[1]) & (series.index <= X[-2])]
-            if FlagConverge:
-                return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
+            if len(df) > 0:
+                if FlagConverge:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
+                else:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
             else:
-                return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
+                df = series.loc[(series.index >= X[0]) & (series.index <= X[-1])]
+                if FlagConverge:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
+                else:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
