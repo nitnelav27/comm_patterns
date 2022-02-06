@@ -375,6 +375,7 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999, c
         return (tmp2, altcount)
     else:
         return tmp2
+    
 
 def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
     '''

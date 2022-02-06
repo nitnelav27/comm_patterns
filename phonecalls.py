@@ -375,6 +375,43 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999, c
         return (tmp2, altcount)
     else:
         return tmp2
+    
+def get_survival2(callsdf, ao, af, maxell=250, binell=10, binned=True, base=2):
+    cdf = callsdf.loc[callsdf['aclock'] <= maxell].copy()
+    cdf['ea'] = list(zip(cdf['ego'], cdf['alter']))
+    lf = cdf.groupby('ea')[['aclock']].max().rename({'aclock': 'ell'}, axis='columns')
+    lf['lambda'] = lf['ell'] // binell
+    tmp = cdf.loc[(cdf['aclock'] >= ao) & (cdf['aclock'] <= af)]
+    vol = tmp.groupby('ea')[['time']].count().rename({'time': 'g'}, axis='columns')
+    vol['gamma'] = vol['g'].map(lambda i: int(math.log(i, base)))
+    vol = vol.merge(lf, left_index=True, right_index=True, how='left')
+    result = {}
+    if binned:
+        for gamma in sorted(vol['gamma'].unique()):
+            dfg = vol.loc[vol['gamma'] == gamma]
+            dfg2 = dfg.groupby('lambda')[['gamma']].count().rename({'gamma': 'count'}, axis='columns').sort_index()
+            dfg2['prop'] = dfg2['count'].div(sum(dfg2['count']))
+            dfg3 = pd.DataFrame(index=range(max(dfg2.index) + 1))
+            dfg3 = dfg3.merge(dfg2, left_index=True, right_index=True, how='outer').fillna(0)
+            for i in dfg3.index:
+                tmp2 = dfg3.loc[dfg3.index >= i]
+                dfg3.at[i, 'p'] = sum(tmp2['prop'])
+            dfg3.index.rename('a', inplace=True)
+            result[gamma] = dfg3[['p']]
+    else:
+        for g in sorted(vol['g'].unique()):
+            dfg = vol.loc[vol['g'] == g]
+            dfg2 = dfg.groupby('lambda')[['gamma']].count().rename({'gamma': 'count'}, axis='columns').sort_index()
+            dfg2['prop'] = dfg2['count'].div(sum(dfg2['count']))
+            dfg3 = pd.DataFrame(index=range(max(dfg2.index) + 1))
+            dfg3 = dfg3.merge(dfg2, left_index=True, right_index=True, how='outer').fillna(0)
+            for i in dfg3.index:
+                tmp2 = dfg3.loc[dfg3.index >= i]
+                dfg3.at[i, 'p'] = sum(tmp2['prop'])
+            dfg3.index.rename('a', inplace=True)
+            result[g] = dfg3[['p']]
+    return result
+    
 
 def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
     '''
