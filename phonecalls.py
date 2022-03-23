@@ -2,15 +2,15 @@
 
 import numpy as np
 import pandas as pd
+import networkx as nx
 import datetime as dt
 import scipy.stats as stats
 import statsmodels.api as sm
-import pymannkendall as mk
 import copy
 import os
 import math
 
-def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min_activity=1):
+def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min_activity=1, duration=False):
     '''
     This method takes a file (argument infile), usually in .csv format,
     and process it only to obtain a dataframe with columns [ego, alter,
@@ -30,6 +30,8 @@ def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min
     min_activity    : the minimum number of phone calls between ego and alter to keep
                     the phone calls for this pair in the resulting dataframe. It
                     defaults to 1, or keep all phone calls.
+    duration        : Defaults to False. If not False, identifies the column with the duration of the
+                    phone call, in seconds
     '''
     if header:
         df = pd.read_csv(infile)
@@ -39,9 +41,9 @@ def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min
                 df2 = df.loc[df[filt[0]] == filt[i]]
                 tmp = tmp.append(df2)
         elif len(filt) == 2:
-            df2 = df.loc[df[filt[0]] == filt[1]]
+            tmp = df.loc[df[filt[0]] == filt[1]]
         else:
-            df2 = copy.deepcopy(df)
+            tmp = copy.deepcopy(df)
     else:
         df = pd.read_csv(infile, header=None)
         tmp = pd.DataFrame()
@@ -50,15 +52,18 @@ def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min
                 df2 = df.loc[df[filt[0]] == filt[i]]
                 tmp = tmp.append(df2)
         elif len(filt) == 2:
-            df2 = df.loc[df[filt[0]] == filt[1]]
+            tmp = df.loc[df[filt[0]] == filt[1]]
         else:
-            copy.deepcopy(df)
+            tmp = copy.deepcopy(df)
 
-    egocol = df2[ego]
-    altercol = df2[alter]
-    newindex = list(df2.index)
-    newdf = pd.DataFrame({'ego': egocol, 'alter': altercol}, index=newindex)
-    timecol = df2[timestamp]
+    egocol = tmp[ego]
+    altercol = tmp[alter]
+    if duration:
+        durcol = tmp[duration]
+        newdf = pd.DataFrame({'ego': egocol, 'alter': altercol, 'duration': durcol})
+    else:
+        newdf = pd.DataFrame({'ego': egocol, 'alter': altercol})
+    timecol = tmp[timestamp]
     if len(timecol.columns) > 1:
         for i in list(timecol.columns):
             if i == list(timecol.columns)[0]:
@@ -69,31 +74,27 @@ def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min
                 newdf['time'] += timecol[i]
     else:
         newdf['time'] = timecol
-
     newdf['time'] = pd.to_datetime(newdf['time'], format=tstampformat)
+    newdf['date'] = newdf['time'].map(lambda i: i.strftime('%Y-%m-%d'))
+    newdf['date'] = pd.to_datetime(newdf['date'], format='%Y-%m-%d')
     newdf.sort_values(by=['alter', 'ego', 'time'], ascending=[True, True, True], inplace=True)
-    newdf['no'] = 1
-    newdf['no'] = newdf.groupby(['alter', 'ego'])[['no']].cumsum()
-    newdf['no'] -= 1
-
-    tmp = newdf.groupby(['ego', 'alter'])[['no']].max().reset_index()
-    tmp.columns = ['ego', 'alter', 'ma']
-    tmp['ma'] += 1
-    newdf = newdf.merge(tmp, on=['ego', 'alter'])
-    newdf = newdf.loc[newdf['ma'] >= min_activity]
-
-    mindate = min(newdf['time'])
-    newdf['uclock'] = (newdf.loc[:, 'time'] - mindate).dt.days
-    newdf.loc[:, 'firstcall'] = False
-    newdf.loc[newdf['no'] == 0, 'firstcall'] = True
-    tmp = newdf.loc[newdf['firstcall'], ['ego', 'alter', 'uclock']]
-    tmp.columns = ['ego', 'alter', 'fcall']
-    newdf = newdf.merge(tmp, left_on=['ego', 'alter'], right_on=['ego', 'alter'])
-    newdf['aclock'] = newdf['uclock'] - newdf['fcall']
-    newdf.drop(columns=['fcall', 'firstcall', 'no', 'ma'], inplace=True)
-    newdf = newdf.astype({'uclock': int, 'aclock': int})
-    newdf.reset_index(drop=True, inplace=True)
-
+    mindate = min(newdf['date'])
+    newdf['t'] = newdf['date'].map(lambda i: (i - mindate).days)
+    newdf['ea'] = list(zip(newdf['ego'], newdf['alter']))
+    t0i = newdf.groupby('ea')['date'].min().rename({'date': 't0i'}, axis='columns')
+    newdf['a'] = newdf.index.map(lambda i: (newdf.at[i, 'date'] - t0i[newdf.at[i, 'ea']]).days)
+    ncalls = newdf.groupby('ea')[['time']].count()
+    ncalls = ncalls.loc[ncalls['time'] >= min_activity]
+    newdf = newdf[newdf['ea'].isin(ncalls.index)]
+    newdf['ego'] = newdf['ego'].map(lambda i: hex(hash(i)))
+    newdf['alter'] = newdf['alter'].map(lambda i: hex(hash(i)))
+    newdf['ea'] = newdf['ea'].map(lambda i: hex(hash(i)))
+    if duration:
+        newdf.columns = ['ego', 'alter', 'duration','time', 'date', 't', 'pair', 'a']
+        newdf = newdf[['ego', 'alter', 'pair', 'time', 'date', 'duration', 't', 'a']]
+    else:
+        newdf.columns = ['ego', 'alter', 'time', 'date', 't', 'pair', 'a']
+        newdf = newdf[['ego', 'alter', 'pair', 'time', 'date', 't', 'a']]
     return newdf
 
 def limit_calls(unf_calls, T):
@@ -194,6 +195,31 @@ def apply_filters(unf_calls, delta):
     df2 = df[~df['ea'].isin(rmpairs)]
     df3 = df2.drop(columns=['ea']).reset_index(drop=True)
     return df3
+
+def apply_filters2(unf_calls, delta):
+    '''
+    This function implements the following filters for the data:
+    
+    1. Removes dtimestamp duplicates for all ego-alter pairs
+    2. Removes all ego-alter pairs with fewer than 3 calls
+    3. Removes all pairs with any contact in the interval
+       [T - delta, T)
+    '''
+    T = max(unf_calls['t'])
+    df = unf_calls.copy(deep=True)
+    df = df.sort_values(by=['pair', 'time'])
+    df['shifted'] = df['time'].shift(-1)
+    df['d'] = (df['shifted'] - df['time']).dt.total_seconds()
+    torm = list(df.loc[df['d'] == 0].index)
+    df = df.drop(torm)
+    df = df.drop(columns = ['shifted', 'd'])
+    ncalls = df.groupby('pair')[['time']].count().rename(columns={'time': 'ncalls'})
+    ncalls = ncalls.loc[ncalls['ncalls'] > 2]
+    df = df[df['pair'].isin(ncalls.index)]
+    tmp = df.loc[df['t'] > (T - delta)]
+    rmpairs = list(tmp['pair'].unique())
+    df2 = df[~df['pair'].isin(rmpairs)]
+    return df2
 
 
 def get_f(callsdf, theego, bina, binell, external_lives=False):
@@ -375,43 +401,6 @@ def get_survival(fresult, alphafixed=1, base=2, unbinned=False, lambdamax=999, c
         return (tmp2, altcount)
     else:
         return tmp2
-    
-def get_survival2(callsdf, ao, af, maxell=250, binell=10, binned=True, base=2):
-    cdf = callsdf.loc[callsdf['aclock'] <= maxell].copy()
-    cdf['ea'] = list(zip(cdf['ego'], cdf['alter']))
-    lf = cdf.groupby('ea')[['aclock']].max().rename({'aclock': 'ell'}, axis='columns')
-    lf['lambda'] = lf['ell'] // binell
-    tmp = cdf.loc[(cdf['aclock'] >= ao) & (cdf['aclock'] <= af)]
-    vol = tmp.groupby('ea')[['time']].count().rename({'time': 'g'}, axis='columns')
-    vol['gamma'] = vol['g'].map(lambda i: int(math.log(i, base)))
-    vol = vol.merge(lf, left_index=True, right_index=True, how='left')
-    result = {}
-    if binned:
-        for gamma in sorted(vol['gamma'].unique()):
-            dfg = vol.loc[vol['gamma'] == gamma]
-            dfg2 = dfg.groupby('lambda')[['gamma']].count().rename({'gamma': 'count'}, axis='columns').sort_index()
-            dfg2['prop'] = dfg2['count'].div(sum(dfg2['count']))
-            dfg3 = pd.DataFrame(index=range(max(dfg2.index) + 1))
-            dfg3 = dfg3.merge(dfg2, left_index=True, right_index=True, how='outer').fillna(0)
-            for i in dfg3.index:
-                tmp2 = dfg3.loc[dfg3.index >= i]
-                dfg3.at[i, 'p'] = sum(tmp2['prop'])
-            dfg3.index.rename('a', inplace=True)
-            result[gamma] = dfg3[['p']]
-    else:
-        for g in sorted(vol['g'].unique()):
-            dfg = vol.loc[vol['g'] == g]
-            dfg2 = dfg.groupby('lambda')[['gamma']].count().rename({'gamma': 'count'}, axis='columns').sort_index()
-            dfg2['prop'] = dfg2['count'].div(sum(dfg2['count']))
-            dfg3 = pd.DataFrame(index=range(max(dfg2.index) + 1))
-            dfg3 = dfg3.merge(dfg2, left_index=True, right_index=True, how='outer').fillna(0)
-            for i in dfg3.index:
-                tmp2 = dfg3.loc[dfg3.index >= i]
-                dfg3.at[i, 'p'] = sum(tmp2['prop'])
-            dfg3.index.rename('a', inplace=True)
-            result[g] = dfg3[['p']]
-    return result
-    
 
 def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
     '''
@@ -449,12 +438,12 @@ def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
         yf = yo
         return [(xo, yo), (xf, yf)]
 
-def histogram(array, bins, log=True, base=10):
+def histogram(array, bins, log=True):
     xl = sorted(list(array))
     xo = xl[0]
     xf = xl[-1]
     if log:
-        lmu = math.log(xf / xo, base) / bins
+        lmu = np.log10(xf / xo) / bins
         mu = 10**lmu
     dx = (xf - xo) / bins
     h = {}
@@ -709,24 +698,6 @@ def gaps(callsdf, ello, ellf, dayres=1, zero=False):
     return (H, Hcv, mcv, scv)
 
 def get_b_slopes(series, patternsize=3, FlagConverge=False):
-    '''
-    This method takes a series of f(a) and gets the "steady region" height. To do this, the algorith works by
-    1. Start with the complete series, and calculate the slope between the f(a = 0) and f(a = max(a)).
-    2. Remove the last point and calculate the slope of the line between f(a = 0) and f(a = max(a) - 1).
-    3. Remove the first point and calculate the slope between f(a = 1) and f(a = max(a) - 1).
-    4. Whenever the slope has a different sign in the past three iterations, stop the algorithm and 
-       return the value of b. If the slope has the same signs for the past three ieterations, repeats steps
-       1, 2, and 3 evaluating at every step.
-       
-    The arguments for this function are:
-    series          : the series of f(a) to obtain b(ell)
-    patternsize     : how many iteration to look for the pattern breaking. Defaults to 3
-    FlagConverge    : If True, flags whenever the algorithm did not converge. I.e. there was no steady plateau.
-                      Defaults to False.
-                      
-    This function returns a list with the following elements: the values for the starting and ending points in
-    the horizontal axis; the values for the vertical axis; and wheter the algorithm converged or not.
-    '''
     allslopes = []
     X = list(series.index)
     N = len(X)
@@ -736,20 +707,11 @@ def get_b_slopes(series, patternsize=3, FlagConverge=False):
     allslopes.append(slope)
     for i in range(1, N):
         newx = X[i // 2: N - ((i + 1) // 2)]
-        if len(newx) >= 3:
+        if len(newx) > 1:
             xo, xf = newx[0], newx[-1]
             yo, yf = series.at[xo, 'f'], series.at[xf, 'f']
             slope = (yf - yo) / (xf - xo)
             allslopes.append(slope)
-        elif len(X) < 3:
-            xo, xf = X[0], X[-1]
-            df = series.loc[(series.index >= xo) & (series.index <= xf)]
-            yo = np.mean(df['f'])
-            yf = yo
-            if FlagConverge:
-                return [[xo, xf], [yo, yf], False]
-            else:
-                return [[xo, xf], [yo, yf]]
         else:
             xo, xf = X[1], X[-2]
             df = series.loc[(series.index >= xo) & (series.index <= xf)]
@@ -769,50 +731,3 @@ def get_b_slopes(series, patternsize=3, FlagConverge=False):
                     return [[xo, xf], [yo, yf], True]
                 else:
                     return [[xo, xf], [yo, yf]]
-                
-def get_b_mk(series, FlagConverge=False):
-    '''
-    This method takes a series of f(a) and gets the "steady region" height. It does it by using the Mann-Kendall
-    test for trends. If it finds a trend, the algorithm keeps iterating. When it find no trend, it will output
-    coordinates for the x and y axes.
-    
-    The arguments for this function are:
-    series          : the series of f(a) to obtain b(ell)
-    
-    This function returns a list with the following elements: the values for the starting and ending points in
-    the horizontal axis; the values for the vertical axis;
-    '''
-    X = sorted(list(series.index))
-    N = len(series)
-    q = 0
-    tmp = mk.original_test(series['f'])
-    if tmp[0] == 'notrend':
-        if FlagConverge:
-            return [[X[0], X[-1]], [np.mean(series['f']), np.mean(series['f'])], True, q]
-        else:
-            return [[X[0], X[-1]], [np.mean(series['f']), np.mean(series['f'])], q]
-    else:
-        for i in range(1, N):
-            newx = X[i // 2: N - ((i + 1) // 2)]
-            df = series.loc[(series.index >= newx[0]) & (series.index <= newx[-1])]
-            if len(df) > 1:
-                tmp = mk.original_test(df['f'])
-                if tmp[0] == 'notrend':
-                    if FlagConverge:
-                        return [[newx[0], newx[-1]], [np.mean(df['f']), np.mean(df['f'])], True, q]
-                    else:
-                        return [[newx[0], newx[-1]], [np.mean(df['f']), np.mean(df['f'])], q]
-                    q += 1
-        else:
-            df = series.loc[(series.index >= X[1]) & (series.index <= X[-2])]
-            if len(df) > 0:
-                if FlagConverge:
-                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
-                else:
-                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
-            else:
-                df = series.loc[(series.index >= X[0]) & (series.index <= X[-1])]
-                if FlagConverge:
-                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
-                else:
-                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
