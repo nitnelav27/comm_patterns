@@ -6,9 +6,98 @@ import networkx as nx
 import datetime as dt
 import scipy.stats as stats
 import statsmodels.api as sm
+import pymannkendall as mk
 import copy
 import os
 import math
+
+def oldcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min_activity=1):
+    '''
+    Old code for the method "allcalls". The updated version is in this module.
+    This method takes a file (argument infile), usually in .csv format,
+    and process it only to obtain a dataframe with columns [ego, alter,
+    timestamp, universal clock, alter clock]. In order to produce that,
+    it uses the following arguments
+    filt            : in case you need to filter phone calls (incoming, etc.)
+                    it can be an empty tuple, in case there are no filters. The first element of the
+                    tuple is the label/number of the column to filter.
+    ego             : which column (label or number) contains the id for ego
+    alter           : same as above, for alter's identifier
+    timestamp       : a list with the label(s) for the timestamp
+    tsstampformat   : Python's format specification to parse dates. Look at the
+                    documentation for the "datetime" module for further reference
+                    https://docs.python.org/3/library/datetime.html#strftime-and-strptime-format-codes
+    header          : does the original file contains headers? It is a boolean value
+                    that defualts to "True"
+    min_activity    : the minimum number of phone calls between ego and alter to keep
+                    the phone calls for this pair in the resulting dataframe. It
+                    defaults to 1, or keep all phone calls.
+    '''
+    if header:
+        df = pd.read_csv(infile)
+        tmp = pd.DataFrame()
+        if len(filt) > 2:
+            for i in range(1, len(filt)):
+                df2 = df.loc[df[filt[0]] == filt[i]]
+                tmp = tmp.append(df2)
+        elif len(filt) == 2:
+            df2 = df.loc[df[filt[0]] == filt[1]]
+        else:
+            df2 = copy.deepcopy(df)
+    else:
+        df = pd.read_csv(infile, header=None)
+        tmp = pd.DataFrame()
+        if len(filt) > 2:
+            for i in range(1, len(filt)):
+                df2 = df.loc[df[filt[0]] == filt[i]]
+                tmp = tmp.append(df2)
+        elif len(filt) == 2:
+            df2 = df.loc[df[filt[0]] == filt[1]]
+        else:
+            copy.deepcopy(df)
+
+    egocol = df2[ego]
+    altercol = df2[alter]
+    newindex = list(df2.index)
+    newdf = pd.DataFrame({'ego': egocol, 'alter': altercol}, index=newindex)
+    timecol = df2[timestamp]
+    if len(timecol.columns) > 1:
+        for i in list(timecol.columns):
+            if i == list(timecol.columns)[0]:
+                newdf['time'] = timecol[i] + " "
+            elif i != list(timecol.columns)[-1]:
+                newdf['time'] += timecol[i] + " "
+            else:
+                newdf['time'] += timecol[i]
+    else:
+        newdf['time'] = timecol
+
+    newdf['time'] = pd.to_datetime(newdf['time'], format=tstampformat)
+    newdf.sort_values(by=['alter', 'ego', 'time'], ascending=[True, True, True], inplace=True)
+    newdf['no'] = 1
+    newdf['no'] = newdf.groupby(['alter', 'ego'])[['no']].cumsum()
+    newdf['no'] -= 1
+
+    tmp = newdf.groupby(['ego', 'alter'])[['no']].max().reset_index()
+    tmp.columns = ['ego', 'alter', 'ma']
+    tmp['ma'] += 1
+    newdf = newdf.merge(tmp, on=['ego', 'alter'])
+    newdf = newdf.loc[newdf['ma'] >= min_activity]
+
+    mindate = min(newdf['time'])
+    newdf['uclock'] = (newdf.loc[:, 'time'] - mindate).dt.days
+    newdf.loc[:, 'firstcall'] = False
+    newdf.loc[newdf['no'] == 0, 'firstcall'] = True
+    tmp = newdf.loc[newdf['firstcall'], ['ego', 'alter', 'uclock']]
+    tmp.columns = ['ego', 'alter', 'fcall']
+    newdf = newdf.merge(tmp, left_on=['ego', 'alter'], right_on=['ego', 'alter'])
+    newdf['aclock'] = newdf['uclock'] - newdf['fcall']
+    newdf.drop(columns=['fcall', 'firstcall', 'no', 'ma'], inplace=True)
+    newdf = newdf.astype({'uclock': int, 'aclock': int})
+    newdf.reset_index(drop=True, inplace=True)
+
+    return newdf
+
 
 def allcalls(infile, filt, ego, alter, timestamp, tstampformat, header=True, min_activity=1, duration=False):
     '''
@@ -731,3 +820,86 @@ def get_b_slopes(series, patternsize=3, FlagConverge=False):
                     return [[xo, xf], [yo, yf], True]
                 else:
                     return [[xo, xf], [yo, yf]]
+                
+def get_survival2(callsdf, ao, af, maxell=250, binell=10, binned=True, base=2):
+    cdf = callsdf.loc[callsdf['aclock'] <= maxell].copy()
+    cdf['ea'] = list(zip(cdf['ego'], cdf['alter']))
+    lf = cdf.groupby('ea')[['aclock']].max().rename({'aclock': 'ell'}, axis='columns')
+    lf['lambda'] = lf['ell'] // binell
+    tmp = cdf.loc[(cdf['aclock'] >= ao) & (cdf['aclock'] <= af)]
+    vol = tmp.groupby('ea')[['time']].count().rename({'time': 'g'}, axis='columns')
+    vol['gamma'] = vol['g'].map(lambda i: int(math.log(i, base)))
+    vol = vol.merge(lf, left_index=True, right_index=True, how='left')
+    result = {}
+    if binned:
+        for gamma in sorted(vol['gamma'].unique()):
+            dfg = vol.loc[vol['gamma'] == gamma]
+            dfg2 = dfg.groupby('lambda')[['gamma']].count().rename({'gamma': 'count'}, axis='columns').sort_index()
+            dfg2['prop'] = dfg2['count'].div(sum(dfg2['count']))
+            dfg3 = pd.DataFrame(index=range(max(dfg2.index) + 1))
+            dfg3 = dfg3.merge(dfg2, left_index=True, right_index=True, how='outer').fillna(0)
+            for i in dfg3.index:
+                tmp2 = dfg3.loc[dfg3.index >= i]
+                dfg3.at[i, 'p'] = sum(tmp2['prop'])
+            dfg3.index.rename('a', inplace=True)
+            result[gamma] = dfg3[['p']]
+    else:
+        for g in sorted(vol['g'].unique()):
+            dfg = vol.loc[vol['g'] == g]
+            dfg2 = dfg.groupby('lambda')[['gamma']].count().rename({'gamma': 'count'}, axis='columns').sort_index()
+            dfg2['prop'] = dfg2['count'].div(sum(dfg2['count']))
+            dfg3 = pd.DataFrame(index=range(max(dfg2.index) + 1))
+            dfg3 = dfg3.merge(dfg2, left_index=True, right_index=True, how='outer').fillna(0)
+            for i in dfg3.index:
+                tmp2 = dfg3.loc[dfg3.index >= i]
+                dfg3.at[i, 'p'] = sum(tmp2['prop'])
+            dfg3.index.rename('a', inplace=True)
+            result[g] = dfg3[['p']]
+    return result
+
+def get_b_mk(series, FlagConverge=False):
+    '''
+    This method takes a series of f(a) and gets the "steady region" height. It does it by using the Mann-Kendall
+    test for trends. If it finds a trend, the algorithm keeps iterating. When it find no trend, it will output
+    coordinates for the x and y axes.
+    
+    The arguments for this function are:
+    series          : the series of f(a) to obtain b(ell)
+    
+    This function returns a list with the following elements: the values for the starting and ending points in
+    the horizontal axis; the values for the vertical axis;
+    '''
+    X = sorted(list(series.index))
+    N = len(series)
+    q = 0
+    tmp = mk.original_test(series['f'])
+    if tmp[0] == 'notrend':
+        if FlagConverge:
+            return [[X[0], X[-1]], [np.mean(series['f']), np.mean(series['f'])], True, q]
+        else:
+            return [[X[0], X[-1]], [np.mean(series['f']), np.mean(series['f'])], q]
+    else:
+        for i in range(1, N):
+            newx = X[i // 2: N - ((i + 1) // 2)]
+            df = series.loc[(series.index >= newx[0]) & (series.index <= newx[-1])]
+            if len(df) > 1:
+                tmp = mk.original_test(df['f'])
+                if tmp[0] == 'notrend':
+                    if FlagConverge:
+                        return [[newx[0], newx[-1]], [np.mean(df['f']), np.mean(df['f'])], True, q]
+                    else:
+                        return [[newx[0], newx[-1]], [np.mean(df['f']), np.mean(df['f'])], q]
+                    q += 1
+        else:
+            df = series.loc[(series.index >= X[1]) & (series.index <= X[-2])]
+            if len(df) > 0:
+                if FlagConverge:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
+                else:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
+            else:
+                df = series.loc[(series.index >= X[0]) & (series.index <= X[-1])]
+                if FlagConverge:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], False, 999]
+                else:
+                    return [[list(df.index)[0], list(df.index)[-1]], [np.mean(df['f']), np.mean(df['f'])], 999]
