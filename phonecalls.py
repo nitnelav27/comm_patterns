@@ -449,7 +449,7 @@ def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
         yf = yo
         return [(xo, yo), (xf, yf)]
 
-def histogram(array, bins, log=True, base=10):
+def histogram(array, bins, log=True, base=10, int1=False):
     xl = sorted(list(array))
     xo = xl[0]
     xf = xl[-1]
@@ -473,7 +473,9 @@ def histogram(array, bins, log=True, base=10):
                 i = int((x - xo) // dx)
                 h[i] = h.get(i, 0) + 1
     df = pd.DataFrame.from_dict(h, orient='index', columns=['h'])
+    # df = df.reindex(range(bins), fill_value=0)
     df['pmf'] = df['h'].div(sum(df['h']))
+    df['pdf'] = df['pmf'] / dx
     for i in df.index:
         if log:
             df.at[i, 'label'] = xo*(mu**i)
