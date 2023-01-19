@@ -527,11 +527,7 @@ def get_plateau(series, pstar=0.1, arbxo=2, arbxf=2):
         yf = yo
         return [(xo, yo), (xf, yf)]
 
-<<<<<<< HEAD
-def histogram(array, bins, log=True, base=10, int1=False):
-=======
 def histogram(array, bins, log=True):
->>>>>>> fe29459643a2154374593d3273b50f5aac307273
     xl = sorted(list(array))
     xo = xl[0]
     xf = xl[-1]
