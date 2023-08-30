@@ -258,7 +258,7 @@ def lives_dictionary(callsdf):
         result[ego] = df.to_dict('index')
     return result
 
-def apply_filters(unf_calls, delta):
+def apply_filters(unf_calls, delta, mincalls=3):
     '''
     This function implements the following filters for the data:
     
@@ -277,7 +277,7 @@ def apply_filters(unf_calls, delta):
     df = df.drop(torm)
     df = df.drop(columns = ['shifted', 'd'])
     ncalls = df.groupby('ea')[['time']].count().rename(columns={'time': 'ncalls'})
-    ncalls = ncalls.loc[ncalls['ncalls'] > 2]
+    ncalls = ncalls.loc[ncalls['ncalls'] >= mincalls]
     df = df[df['ea'].isin(ncalls.index)]
     tmp = df.loc[df['uclock'] > (T - delta)]
     rmpairs = list(tmp['ea'].unique())
